@@ -102,19 +102,35 @@ class App extends React.Component {
     this.setState({ xDivision: event.target.xDivision });
     this.setState({ yDivision: event.target.yDivision });
   }
-  addColor(elements) {
+  addColor(elements, clases) {
+    var colores = [
+      "deepPink",
+      "greenYellow",
+      "aqua",
+      "orange",
+      "green",
+      "yellow",
+      "fuchsia",
+      "lime",
+      "navy",
+      "darkgray",
+    ];
+    for (var i = 0; i < elements.length; i++) {
+      elements[i].clase = colores[clases.indexOf(elements[i].clase)];
+    }
     var elementos = JSON.stringify(elements);
     elementos = elementos.replaceAll("clase", "color");
-    elementos = elementos.replaceAll("C1", "deepPink");
-    elementos = elementos.replaceAll("C2", "greenYellow");
-    elementos = elementos.replaceAll("C3", "aqua");
-    elementos = elementos.replaceAll("C4", "green");
-    elementos = elementos.replaceAll("C5", "yellow");
-    elementos = elementos.replaceAll("C6", "black");
-    elementos = elementos.replaceAll("C7", "fuchsia");
-    elementos = elementos.replaceAll("C8", "lime");
-    elementos = elementos.replaceAll("C9", "navy");
-    elementos = elementos.replaceAll("C10", "darkgray");
+    elementos = JSON.parse(elementos);
+    // elementos = elementos.replaceAll("C1", "deepPink");
+    // elementos = elementos.replaceAll("C2", "greenYellow");
+    // elementos = elementos.replaceAll("C3", "aqua");
+    // elementos = elementos.replaceAll("C4", "green");
+    // elementos = elementos.replaceAll("C5", "yellow");
+    // elementos = elementos.replaceAll("C6", "black");
+    // elementos = elementos.replaceAll("C7", "fuchsia");
+    // elementos = elementos.replaceAll("C8", "lime");
+    // elementos = elementos.replaceAll("C9", "navy");
+    // elementos = elementos.replaceAll("C10", "darkgray");
     return elementos;
   }
 
@@ -154,14 +170,20 @@ class App extends React.Component {
       .then((response) => {
         var gridElements = response.data.gridElements;
         var testElements = response.data.testElements;
+        var clases = [];
+        for (var i = 0; i < gridElements.length; i++) {
+          if (!clases.includes(gridElements[i].clase)) {
+            clases.push(gridElements[i].clase);
+          }
+        }
+        console.log(clases);
 
-        gridElements = this.addColor(gridElements);
-        testElements = this.addColor(testElements);
+        gridElements = this.addColor(gridElements, clases);
+        testElements = this.addColor(testElements, clases);
 
-        var testElements = JSON.parse(testElements);
-        var gridElements = JSON.parse(gridElements);
         // console.log(testElements);
         // console.log(gridElements);
+
         this.setState({ testElements, gridElements });
         console.log(this.state);
       })
