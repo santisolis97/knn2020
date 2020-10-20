@@ -18,7 +18,7 @@ import ReactDOM from "react-dom";
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { value: "", datos: [] };
+    this.state = { value: "", datos: [], clases: ["clases"], colores: [] };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -96,6 +96,7 @@ class App extends React.Component {
 
     return str;
   }
+
   handleChange(event) {
     this.setState({ value: event.target.value });
     this.setState({ k: event.target.k });
@@ -115,22 +116,13 @@ class App extends React.Component {
       "navy",
       "darkgray",
     ];
+    this.setState({ colores });
     for (var i = 0; i < elements.length; i++) {
       elements[i].clase = colores[clases.indexOf(elements[i].clase)];
     }
     var elementos = JSON.stringify(elements);
     elementos = elementos.replaceAll("clase", "color");
     elementos = JSON.parse(elementos);
-    // elementos = elementos.replaceAll("C1", "deepPink");
-    // elementos = elementos.replaceAll("C2", "greenYellow");
-    // elementos = elementos.replaceAll("C3", "aqua");
-    // elementos = elementos.replaceAll("C4", "green");
-    // elementos = elementos.replaceAll("C5", "yellow");
-    // elementos = elementos.replaceAll("C6", "black");
-    // elementos = elementos.replaceAll("C7", "fuchsia");
-    // elementos = elementos.replaceAll("C8", "lime");
-    // elementos = elementos.replaceAll("C9", "navy");
-    // elementos = elementos.replaceAll("C10", "darkgray");
     return elementos;
   }
 
@@ -176,8 +168,8 @@ class App extends React.Component {
             clases.push(gridElements[i].clase);
           }
         }
-        console.log(clases);
-
+        this.setState({ clases });
+        console.log(this.state.clases);
         gridElements = this.addColor(gridElements, clases);
         testElements = this.addColor(testElements, clases);
 
@@ -185,6 +177,7 @@ class App extends React.Component {
         // console.log(gridElements);
 
         this.setState({ testElements, gridElements });
+
         console.log(this.state);
       })
       .catch(function (error) {
@@ -192,6 +185,8 @@ class App extends React.Component {
       });
   }
   render() {
+    const elements = this.state.clases;
+
     return (
       <div className="App">
         <header className="App-header">
@@ -246,6 +241,16 @@ class App extends React.Component {
                   data={this.state.testElements}
                 />
               </XYPlot>
+              <ul>
+                {this.state.clases.map((value, index) => {
+                  return <li key={index}>{value}</li>;
+                })}
+              </ul>
+              <ul>
+                {this.state.colores.map((value, index) => {
+                  return <li key={index}>{value}</li>;
+                })}
+              </ul>
             </div>
           </div>
         </header>
