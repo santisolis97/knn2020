@@ -143,7 +143,7 @@ class App extends React.Component {
     var data = JSON.stringify(json);
     var config = {
       method: "post",
-      url: `http://localhost:8080/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
+      url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
       headers: {
         "Content-Type": "application/json",
       },
