@@ -105,9 +105,9 @@ class App extends React.Component {
   addColor(elements) {
     var elementos = JSON.stringify(elements);
     elementos = elementos.replaceAll("clase", "color");
-    elementos = elementos.replaceAll("C1", "red");
-    elementos = elementos.replaceAll("C2", "blue");
-    elementos = elementos.replaceAll("C3", "orange");
+    elementos = elementos.replaceAll("C1", "moccasin");
+    elementos = elementos.replaceAll("C2", "crimson");
+    elementos = elementos.replaceAll("C3", "deepPink");
     elementos = elementos.replaceAll("C4", "green");
     elementos = elementos.replaceAll("C5", "yellow");
     elementos = elementos.replaceAll("C6", "black");
