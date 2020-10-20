@@ -105,9 +105,9 @@ class App extends React.Component {
   addColor(elements) {
     var elementos = JSON.stringify(elements);
     elementos = elementos.replaceAll("clase", "color");
-    elementos = elementos.replaceAll("C1", "moccasin");
-    elementos = elementos.replaceAll("C2", "crimson");
-    elementos = elementos.replaceAll("C3", "deepPink");
+    elementos = elementos.replaceAll("C1", "deepPink");
+    elementos = elementos.replaceAll("C2", "greenYellow");
+    elementos = elementos.replaceAll("C3", "aqua");
     elementos = elementos.replaceAll("C4", "green");
     elementos = elementos.replaceAll("C5", "yellow");
     elementos = elementos.replaceAll("C6", "black");
@@ -136,7 +136,7 @@ class App extends React.Component {
     csv = csv.replace("x2", "y");
     csv = csv.replace("Clase", "clase");
     csv = this.csv2Json(csv);
-    console.log(csv);
+    // console.log(csv);
 
     // console.log(this.csv2Json(csv));
     var json = JSON.parse(csv);
@@ -149,7 +149,7 @@ class App extends React.Component {
       },
       data: data,
     };
-    console.log(json);
+    // console.log(json);
     axios(config)
       .then((response) => {
         var gridElements = response.data.gridElements;
@@ -160,8 +160,8 @@ class App extends React.Component {
 
         var testElements = JSON.parse(testElements);
         var gridElements = JSON.parse(gridElements);
-        console.log(testElements);
-        console.log(gridElements);
+        // console.log(testElements);
+        // console.log(gridElements);
         this.setState({ testElements, gridElements });
         console.log(this.state);
       })
@@ -205,13 +205,19 @@ class App extends React.Component {
               <XYPlot width={1000} height={700}>
                 <XAxis />
                 <YAxis />
-                <MarkSeries
+                <HeatmapSeries
+                  className="heatmap-series-example"
+                  colorType="literal"
+                  opacity="0.1"
+                  data={this.state.gridElements}
+                />
+                {/* <MarkSeries
                   className="heatmap-series-example"
                   colorType="literal"
                   data={this.state.gridElements}
                   opacity="0.05"
                   size={this.state.markSize}
-                />
+                /> */}
                 <MarkSeries
                   className="heatmap-series-example"
                   colorType="literal"
