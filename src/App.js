@@ -18,11 +18,31 @@ import ReactDOM from "react-dom";
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { value: "", datos: [], clases: ["clases"], colores: [] };
+    this.state = {
+      value: "",
+      clases: [],
+      colores: [],
+      usedColors: [],
+      gridElements: [],
+    };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
-  componentDidMount() {}
+  componentDidMount() {
+    var colores = [
+      "deepPink",
+      "greenYellow",
+      "aqua",
+      "orange",
+      "green",
+      "yellow",
+      "fuchsia",
+      "lime",
+      "navy",
+      "darkgray",
+    ];
+    this.setState({ colores });
+  }
 
   csvToArray(strData, strDelimiter) {
     // Check to see if the delimiter is defined. If not,
@@ -104,41 +124,31 @@ class App extends React.Component {
     this.setState({ yDivision: event.target.yDivision });
   }
   addColor(elements, clases) {
-    var colores = [
-      "deepPink",
-      "greenYellow",
-      "aqua",
-      "orange",
-      "green",
-      "yellow",
-      "fuchsia",
-      "lime",
-      "navy",
-      "darkgray",
-    ];
-    this.setState({ colores });
     for (var i = 0; i < elements.length; i++) {
-      elements[i].clase = colores[clases.indexOf(elements[i].clase)];
+      elements[i].clase = this.state.colores[clases.indexOf(elements[i].clase)];
     }
     var elementos = JSON.stringify(elements);
     elementos = elementos.replaceAll("clase", "color");
     elementos = JSON.parse(elementos);
     return elementos;
   }
+  getUsedColors(clases) {
+    var usedColors = [];
+    for (var j = 0; j < clases.length; j++) {
+      usedColors.push(this.state.colores[j]);
+    }
+    return usedColors;
+  }
 
   handleSubmit(event) {
     event.preventDefault();
+
     const dataxios = new FormData(event.target);
     var kValue = dataxios.get("kValue");
+    this.setState({ kValue });
     var xDivision = dataxios.get("xDivision");
     var yDivision = dataxios.get("yDivision");
-    if (xDivision <= 10) {
-      this.setState({ markSize: xDivision * 3 });
-    } else if (xDivision <= 60) {
-      this.setState({ markSize: xDivision * 0.5 });
-    } else {
-      this.setState({ markSize: xDivision * 0.1 });
-    }
+
     var csv = this.state.value;
     csv = csv.replace("x1", "x");
     csv = csv.replace("x2", "y");
@@ -149,6 +159,7 @@ class App extends React.Component {
     // console.log(this.csv2Json(csv));
     var json = JSON.parse(csv);
     var data = JSON.stringify(json);
+    // console.log(json);
     var config = {
       method: "post",
       url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
@@ -160,23 +171,23 @@ class App extends React.Component {
     // console.log(json);
     axios(config)
       .then((response) => {
+        console.log(response);
         var gridElements = response.data.gridElements;
         var testElements = response.data.testElements;
+        var kFactor = response.data.kfactor;
+        this.setState({ kFactor });
         var clases = [];
-        for (var i = 0; i < gridElements.length; i++) {
-          if (!clases.includes(gridElements[i].clase)) {
-            clases.push(gridElements[i].clase);
+        for (var i = 0; i < testElements.length; i++) {
+          if (!clases.includes(testElements[i].clase)) {
+            clases.push(testElements[i].clase);
           }
         }
         this.setState({ clases });
-        console.log(this.state.clases);
         gridElements = this.addColor(gridElements, clases);
         testElements = this.addColor(testElements, clases);
-
-        // console.log(testElements);
-        // console.log(gridElements);
-
+        var usedColors = this.getUsedColors(this.state.clases);
         this.setState({ testElements, gridElements });
+        this.setState({ usedColors });
 
         console.log(this.state);
       })
@@ -218,40 +229,51 @@ class App extends React.Component {
             </button>
           </form>
           <div id="wrapper">
-            <div className="chart">
-              <XYPlot width={1000} height={700}>
-                <XAxis />
-                <YAxis />
-                <HeatmapSeries
-                  className="heatmap-series-example"
-                  colorType="literal"
-                  opacity="0.1"
-                  data={this.state.gridElements}
-                />
-                {/* <MarkSeries
-                  className="heatmap-series-example"
-                  colorType="literal"
-                  data={this.state.gridElements}
-                  opacity="0.05"
-                  size={this.state.markSize}
-                /> */}
-                <MarkSeries
-                  className="heatmap-series-example"
-                  colorType="literal"
-                  data={this.state.testElements}
-                />
-              </XYPlot>
-              <ul>
-                {this.state.clases.map((value, index) => {
-                  return <li key={index}>{value}</li>;
-                })}
-              </ul>
-              <ul>
-                {this.state.colores.map((value, index) => {
-                  return <li key={index}>{value}</li>;
-                })}
-              </ul>
-            </div>
+            {this.state.gridElements.length > 0 && (
+              <div className="chart">
+                <p>
+                  El valor de coherencia para K = {this.state.kValue} es de{" "}
+                  {this.state.kFactor}
+                </p>
+                <XYPlot width={1000} height={600}>
+                  <XAxis />
+                  <YAxis />
+                  <HeatmapSeries
+                    className="heatmap-series-example"
+                    colorType="literal"
+                    opacity="0.1"
+                    data={this.state.gridElements}
+                  />
+                  <MarkSeries
+                    className="heatmap-series-example"
+                    colorType="literal"
+                    data={this.state.testElements}
+                  />
+                </XYPlot>
+              </div>
+            )}
+            {this.state.usedColors.length > 0 && (
+              <table className="table table-dark table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">Clase</th>
+                    <th scope="col">Color</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.clases.map((value, index) => {
+                    return (
+                      <tr key={index}>
+                        <th>{value}</th>
+                        <th>
+                          <div className={this.state.usedColors[index]}></div>
+                        </th>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
           </div>
         </header>
       </div>

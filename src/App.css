@@ -39,3 +39,58 @@
     transform: rotate(360deg);
   }
 }
+.deepPink{
+  height: 30px;
+  width: 100%;
+  background-color: deeppink;
+  /* text-align: center; */
+}
+.aqua{
+  height: 30px;
+  width: 100%;
+  background-color: aqua;
+}
+.greenYellow{
+  height: 30px;
+  width: 100%;
+  background-color: greenYellow;
+}
+.orange{
+  height: 30px;
+  width: 100%;
+  background-color: orange;
+}
+.green{
+  height: 30px;
+  width: 100%;
+  background-color: green;
+}
+.yellow{
+  height: 30px;
+  width: 100%;
+  background-color: yellow;
+}
+.fuchsia{
+  height: 30px;
+  width: 100%;
+  background-color: fuchsia;
+}
+.lime{
+  height: 30px;
+  width: 100%;
+  background-color: lime;
+}
+.navy{
+  height: 30px;
+  width: 100%;
+  background-color: navy;
+}
+.darkgray{
+  height: 30px;
+  width: 100%;
+  background-color: darkgray;
+}
+.colores{
+      list-style-type: none;
+
+}
