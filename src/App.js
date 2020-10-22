@@ -205,63 +205,71 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <form onSubmit={this.handleSubmit}>
-            <div className="form-group">
-              <p>Insert Dataset:</p>
-              <textarea
-                value={this.state.value}
-                onChange={this.handleChange}
-                cols="30"
-                rows="10"
-              ></textarea>
-            </div>
-            <div className="form-group">
-              <p>Insert k:</p>
-              <input name="kValue"></input>
-            </div>
-            <div className="form-group">
-              <p>Insert xDivision:</p>
-              <input name="xDivision"></input>
-            </div>
-            <div className="form-group">
-              <p>Insert yDivision:</p>
+        <div className="App-body container-fluid">
+          <form className="container-fluid" onSubmit={this.handleSubmit}>
+            <div className="row">
+              <div className="col">
+                <div className="form-group">
+                  <p>Insert Dataset:</p>
+                  <textarea
+                    value={this.state.value}
+                    onChange={this.handleChange}
+                    cols="50"
+                    rows="10"
+                  ></textarea>
+                </div>
+              </div>
+              <div className="col">
+                <div className="form-group">
+                  <p>Insert k:</p>
+                  <input type="number" name="kValue"></input>
+                </div>
+                <div className="form-group">
+                  <p>Insert xDivision:</p>
+                  <input type="number" name="xDivision"></input>
+                </div>
+                <div className="form-group">
+                  <p>Insert yDivision:</p>
 
-              <input name="yDivision"></input>
+                  <input type="number" name="yDivision"></input>
+                </div>
+                <button type="submit" className="btn btn-primary">
+                  Submit
+                </button>
+              </div>
             </div>
-            <button type="submit" className="btn btn-primary">
-              Submit
-            </button>
           </form>
           <div id="wrapper">
             {this.state.usedColors.length > 0 && (
-              <table className="table table-dark table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col">Clase</th>
-                    <th scope="col">Color</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.clases.map((value, index) => {
-                    return (
-                      <tr key={index}>
-                        <th>{value}</th>
-                        <th>
-                          <div className={this.state.usedColors[index]}></div>
-                        </th>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-            {this.state.gridElements.length > 0 && (
-              <div className="chart">
+              <div className="tabla">
                 <p>
                   El valor de coherencia para K = {this.state.kValue} es de{" "}
                   {this.state.kFactor}
                 </p>
+                <table className="table table-dark table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col">Clase</th>
+                      <th scope="col">Color</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {this.state.clases.map((value, index) => {
+                      return (
+                        <tr key={index}>
+                          <th>{value}</th>
+                          <th>
+                            <div className={this.state.usedColors[index]}></div>
+                          </th>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            {this.state.gridElements.length > 0 && (
+              <div className="chart">
                 <XYPlot width={1000} height={600}>
                   <XAxis />
                   <YAxis />
@@ -280,7 +288,7 @@ class App extends React.Component {
               </div>
             )}
           </div>
-        </header>
+        </div>
       </div>
     );
   }
