@@ -1,19 +1,8 @@
 import React from "react";
 import "./App.css";
 import "../node_modules/react-vis/dist/style.css";
-import {
-  HeatmapSeries,
-  VerticalBarSeries,
-  MarkSeries,
-  XYPlot,
-  LineSeries,
-  VerticalGridLines,
-  HorizontalGridLines,
-  XAxis,
-  YAxis,
-} from "react-vis";
+import { HeatmapSeries, MarkSeries, XYPlot, XAxis, YAxis } from "react-vis";
 import axios from "axios";
-import ReactDOM from "react-dom";
 
 class App extends React.Component {
   constructor(props) {
@@ -77,7 +66,7 @@ class App extends React.Component {
       // (is not the start of string) and if it matches
       // field delimiter. If id does not, then we know
       // that this delimiter is a row delimiter.
-      if (strMatchedDelimiter.length && strMatchedDelimiter != strDelimiter) {
+      if (strMatchedDelimiter.length && strMatchedDelimiter !== strDelimiter) {
         // Since we have reached a new row of data,
         // add an empty row to our data array.
         arrData.push([]);
@@ -91,7 +80,7 @@ class App extends React.Component {
         var strMatchedValue = arrMatches[2].replace(new RegExp('""', "g"), '"');
       } else {
         // We found a non-quoted value.
-        var strMatchedValue = arrMatches[3];
+        strMatchedValue = arrMatches[3];
       }
       // Now that we have our value string, let's add
       // it to the data array.
@@ -139,6 +128,16 @@ class App extends React.Component {
     }
     return usedColors;
   }
+  getClases(clases1, clases2) {
+    var a = clases1.concat(clases2);
+    var b = [];
+    for (var i = 0; i < a.length; i++) {
+      if (!b.includes(a[i])) {
+        b.push(a[i]);
+      }
+    }
+    return b;
+  }
 
   handleSubmit(event) {
     event.preventDefault();
@@ -171,17 +170,25 @@ class App extends React.Component {
     // console.log(json);
     axios(config)
       .then((response) => {
-        console.log(response);
         var gridElements = response.data.gridElements;
         var testElements = response.data.testElements;
         var kFactor = response.data.kfactor;
         this.setState({ kFactor });
-        var clases = [];
+        var clases1 = [];
         for (var i = 0; i < testElements.length; i++) {
-          if (!clases.includes(testElements[i].clase)) {
-            clases.push(testElements[i].clase);
+          if (!clases1.includes(testElements[i].clase)) {
+            clases1.push(testElements[i].clase);
           }
         }
+        console.log(clases1);
+        var clases2 = [];
+        for (i = 0; i < gridElements.length; i++) {
+          if (!clases2.includes(gridElements[i].clase)) {
+            clases2.push(gridElements[i].clase);
+          }
+        }
+        console.log(clases2);
+        var clases = this.getClases(clases1, clases2);
         this.setState({ clases });
         gridElements = this.addColor(gridElements, clases);
         testElements = this.addColor(testElements, clases);
@@ -196,8 +203,6 @@ class App extends React.Component {
       });
   }
   render() {
-    const elements = this.state.clases;
-
     return (
       <div className="App">
         <header className="App-header">
@@ -229,6 +234,28 @@ class App extends React.Component {
             </button>
           </form>
           <div id="wrapper">
+            {this.state.usedColors.length > 0 && (
+              <table className="table table-dark table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">Clase</th>
+                    <th scope="col">Color</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.clases.map((value, index) => {
+                    return (
+                      <tr key={index}>
+                        <th>{value}</th>
+                        <th>
+                          <div className={this.state.usedColors[index]}></div>
+                        </th>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
             {this.state.gridElements.length > 0 && (
               <div className="chart">
                 <p>
@@ -251,28 +278,6 @@ class App extends React.Component {
                   />
                 </XYPlot>
               </div>
-            )}
-            {this.state.usedColors.length > 0 && (
-              <table className="table table-dark table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col">Clase</th>
-                    <th scope="col">Color</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.clases.map((value, index) => {
-                    return (
-                      <tr key={index}>
-                        <th>{value}</th>
-                        <th>
-                          <div className={this.state.usedColors[index]}></div>
-                        </th>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
             )}
           </div>
         </header>
