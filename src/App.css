@@ -102,3 +102,12 @@ header {
       list-style-type: none;
 
 }
+.landing{
+  height: 78vh;
+}
+tr, th{
+  font-size: 18px;
+}
+.ths{
+  font-weight: normal;
+}

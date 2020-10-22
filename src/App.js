@@ -141,7 +141,6 @@ class App extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-
     const dataxios = new FormData(event.target);
     var kValue = dataxios.get("kValue");
     this.setState({ kValue });
@@ -197,6 +196,9 @@ class App extends React.Component {
         this.setState({ usedColors });
 
         console.log(this.state);
+        document
+          .getElementById("wrapper")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
       })
       .catch(function (error) {
         console.log(error);
@@ -207,47 +209,49 @@ class App extends React.Component {
       <div className="App">
         <header>Knn-Algorithm</header>
         <div className="App-body container-fluid">
-          <form className="container-fluid" onSubmit={this.handleSubmit}>
-            <div className="row">
-              <div className="col">
-                <div className="form-group">
-                  <p>Insert Dataset:</p>
-                  <textarea
-                    value={this.state.value}
-                    onChange={this.handleChange}
-                    cols="50"
-                    rows="10"
-                  ></textarea>
+          <div className="landing">
+            <form className="container-fluid" onSubmit={this.handleSubmit}>
+              <div className="row">
+                <div className="col">
+                  <div className="form-group">
+                    <p>Insert Dataset:</p>
+                    <textarea
+                      value={this.state.value}
+                      onChange={this.handleChange}
+                      cols="50"
+                      rows="10"
+                    ></textarea>
+                  </div>
                 </div>
-              </div>
-              <div className="col">
-                <div className="form-group">
-                  <p>Insert k:</p>
-                  <input type="number" name="kValue"></input>
-                </div>
-                <div className="form-group">
-                  <p>Insert xDivision:</p>
-                  <input type="number" name="xDivision"></input>
-                </div>
-                <div className="form-group">
-                  <p>Insert yDivision:</p>
+                <div className="col">
+                  <div className="form-group">
+                    <p>Insert k:</p>
+                    <input type="number" name="kValue"></input>
+                  </div>
+                  <div className="form-group">
+                    <p>Insert xDivision:</p>
+                    <input type="number" name="xDivision"></input>
+                  </div>
+                  <div className="form-group">
+                    <p>Insert yDivision:</p>
 
-                  <input type="number" name="yDivision"></input>
+                    <input type="number" name="yDivision"></input>
+                  </div>
+                  <button type="submit" className="btn btn-primary">
+                    Submit
+                  </button>
                 </div>
-                <button type="submit" className="btn btn-primary">
-                  Submit
-                </button>
               </div>
-            </div>
-          </form>
-          <div id="wrapper">
+            </form>
+          </div>
+          <div id="wrapper" className="container">
             {this.state.usedColors.length > 0 && (
               <div className="tabla">
                 <p>
                   El valor de coherencia para K = {this.state.kValue} es de{" "}
                   {this.state.kFactor}
                 </p>
-                <table className="table table-dark table-striped">
+                <table className="table table-dark table-sm table-striped">
                   <thead>
                     <tr>
                       <th scope="col">Clase</th>
@@ -258,7 +262,7 @@ class App extends React.Component {
                     {this.state.clases.map((value, index) => {
                       return (
                         <tr key={index}>
-                          <th>{value}</th>
+                          <th className="ths">{value}</th>
                           <th>
                             <div className={this.state.usedColors[index]}></div>
                           </th>
