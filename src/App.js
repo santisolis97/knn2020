@@ -205,6 +205,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
+        <header>Knn-Algorithm</header>
         <div className="App-body container-fluid">
           <form className="container-fluid" onSubmit={this.handleSubmit}>
             <div className="row">
