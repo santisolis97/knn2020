@@ -39,7 +39,7 @@ So, you are good to go. To launch the application please run:
  ```bash
 npm run start
 ```
-
+ƒ
 ## Authors
 The members of the team are:
 - Cardozo, Edgar

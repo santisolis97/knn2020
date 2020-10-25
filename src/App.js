@@ -3,16 +3,21 @@ import "./App.css";
 import "../node_modules/react-vis/dist/style.css";
 import { HeatmapSeries, MarkSeries, XYPlot, XAxis, YAxis } from "react-vis";
 import axios from "axios";
-
+import SyntaxHighlighter from "react-syntax-highlighter";
+import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      resp: "",
+      prevDataset: "x",
       value: "",
       clases: [],
       colores: [],
       usedColors: [],
       gridElements: [],
+      codeString: "",
+      kFactors: [],
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -121,6 +126,51 @@ class App extends React.Component {
     elementos = JSON.parse(elementos);
     return elementos;
   }
+  addClase(elements, clases) {
+    for (var i = 0; i < elements.length; i++) {
+      if (elements[i].clase === "deepPink") {
+        elements[i].clase = clases[0];
+      }
+      if (elements[i].clase === "greenYellow") {
+        elements[i].clase = clases[1];
+      }
+      if (elements[i].clase === "aqua") {
+        elements[i].clase = clases[2];
+      }
+      if (elements[i].clase === "orange") {
+        elements[i].clase = clases[3];
+      }
+      if (elements[i].clase === "green") {
+        elements[i].clase = clases[4];
+      }
+      if (elements[i].clase === "yellow") {
+        elements[i].clase = clases[5];
+      }
+      if (elements[i].clase === "fuchsia") {
+        elements[i].clase = clases[6];
+      }
+      if (elements[i].clase === "lime") {
+        elements[i].clase = clases[7];
+      }
+      if (elements[i].clase === "navy") {
+        elements[i].clase = clases[8];
+      }
+      if (elements[i].clase === "darkgray") {
+        elements[i].clase = clases[9];
+      }
+    }
+
+    return elements;
+  }
+  addColor(elements, clases) {
+    for (var i = 0; i < elements.length; i++) {
+      elements[i].clase = this.state.colores[clases.indexOf(elements[i].clase)];
+    }
+    var elementos = JSON.stringify(elements);
+    elementos = elementos.replaceAll("clase", "color");
+    elementos = JSON.parse(elementos);
+    return elementos;
+  }
   getUsedColors(clases) {
     var usedColors = [];
     for (var j = 0; j < clases.length; j++) {
@@ -157,53 +207,106 @@ class App extends React.Component {
     // console.log(this.csv2Json(csv));
     var json = JSON.parse(csv);
     var data = JSON.stringify(json);
-    // console.log(json);
-    var config = {
-      method: "post",
-      url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: data,
-    };
-    // console.log(json);
-    axios(config)
-      .then((response) => {
-        var gridElements = response.data.gridElements;
-        var testElements = response.data.testElements;
-        var kFactor = response.data.kfactor;
-        this.setState({ kFactor });
-        var clases1 = [];
-        for (var i = 0; i < testElements.length; i++) {
-          if (!clases1.includes(testElements[i].clase)) {
-            clases1.push(testElements[i].clase);
+    if (this.state.value !== this.state.prevDataset) {
+      console.log("entra aca de nuevo gil");
+      this.state.prevDataset = this.state.value;
+      var config = {
+        method: "post",
+        url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: data,
+      };
+      // console.log(json);
+      axios(config)
+        .then((response) => {
+          var gridElements = response.data.gridElements;
+          var testElements = response.data.testElements;
+          this.setState({ testElements, gridElements });
+          console.log(this.state.testElements);
+          var testEl = this.state.testElements;
+          this.setState({ testEl });
+          console.log(this.state.testEl);
+          var kFactors = response.data.kfactor;
+          this.setState({ kFactors });
+          var clases1 = [];
+          for (var i = 0; i < testElements.length; i++) {
+            if (!clases1.includes(testElements[i].clase)) {
+              clases1.push(testElements[i].clase);
+            }
           }
-        }
-        console.log(clases1);
-        var clases2 = [];
-        for (i = 0; i < gridElements.length; i++) {
-          if (!clases2.includes(gridElements[i].clase)) {
-            clases2.push(gridElements[i].clase);
+          var clases2 = [];
+          for (i = 0; i < gridElements.length; i++) {
+            if (!clases2.includes(gridElements[i].clase)) {
+              clases2.push(gridElements[i].clase);
+            }
           }
-        }
-        console.log(clases2);
-        var clases = this.getClases(clases1, clases2);
-        this.setState({ clases });
-        gridElements = this.addColor(gridElements, clases);
-        testElements = this.addColor(testElements, clases);
-        var usedColors = this.getUsedColors(this.state.clases);
-        this.setState({ testElements, gridElements });
-        this.setState({ usedColors });
+          var clases = this.getClases(clases1, clases2);
+          this.setState({ clases });
 
-        console.log(this.state);
-        document
-          .getElementById("wrapper")
-          .scrollIntoView({ behavior: "smooth", block: "start" });
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
+          gridElements = this.addColor(gridElements, clases);
+          testElements = this.addColor(testElements, clases);
+          console.log(this.state.testElements);
+          var usedColors = this.getUsedColors(this.state.clases);
+          this.setState({ testElements, gridElements });
+          this.setState({ usedColors });
+          console.log(this.state);
+          document
+            .getElementById("wrapper")
+            .scrollIntoView({ behavior: "smooth", block: "start" });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    } else {
+      console.log(this.state.kFactors);
+      var testElem = this.addClase(this.state.testEl, this.state.clases);
+      var dataDraw = {
+        dataSet: json,
+        testElements: testElem,
+      };
+      console.log(dataDraw);
+      var configDraw = {
+        method: "post",
+        url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: dataDraw,
+      };
+      axios(configDraw)
+        .then((response) => {
+          var gridElements = response.data.gridElements;
+          var testElements = response.data.testElements;
+          var kFactor = response.data.kfactor;
+          this.setState({ kFactor });
+          var clases1 = [];
+          for (var i = 0; i < testElements.length; i++) {
+            if (!clases1.includes(testElements[i].clase)) {
+              clases1.push(testElements[i].clase);
+            }
+          }
+          var clases2 = [];
+          for (i = 0; i < gridElements.length; i++) {
+            if (!clases2.includes(gridElements[i].clase)) {
+              clases2.push(gridElements[i].clase);
+            }
+          }
+          var clases = this.getClases(clases1, clases2);
+          this.setState({ clases });
+          gridElements = this.addColor(gridElements, clases);
+          testElements = this.addColor(testElements, clases);
+          var usedColors = this.getUsedColors(this.state.clases);
+          this.setState({ testElements, gridElements });
+          this.setState({ usedColors });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
   }
+
   render() {
     return (
       <div className="App">
@@ -237,19 +340,20 @@ class App extends React.Component {
 
                     <input type="number" name="yDivision"></input>
                   </div>
-                  <button type="submit" className="btn btn-primary">
-                    Submit
+                  <button type="submit" className="btn btn-success">
+                    Classify
                   </button>
                 </div>
               </div>
             </form>
           </div>
+
           <div id="wrapper" className="container">
             {this.state.usedColors.length > 0 && (
               <div className="tabla">
                 <p>
                   El valor de coherencia para K = {this.state.kValue} es de{" "}
-                  {this.state.kFactor}
+                  {this.state.kFactors[this.state.kValue - 1]}
                 </p>
                 <table className="table table-dark table-sm table-striped">
                   <thead>
@@ -262,8 +366,8 @@ class App extends React.Component {
                     {this.state.clases.map((value, index) => {
                       return (
                         <tr key={index}>
-                          <th className="ths">{value}</th>
-                          <th>
+                          <th className="cls">{value}</th>
+                          <th className="clr">
                             <div className={this.state.usedColors[index]}></div>
                           </th>
                         </tr>
@@ -292,6 +396,24 @@ class App extends React.Component {
                 </XYPlot>
               </div>
             )}
+            <table className="table table-dark table-sm table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">K</th>
+                  <th scope="col">Accuracy</th>
+                </tr>
+              </thead>
+              <tbody>
+                {this.state.kFactors.map((value, index) => {
+                  return (
+                    <tr key={index}>
+                      <th className="cls">{index + 1}</th>
+                      <th className="clr">{value}</th>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

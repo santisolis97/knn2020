@@ -108,6 +108,10 @@ header {
 tr, th{
   font-size: 18px;
 }
-.ths{
+.cls{
   font-weight: normal;
+  width: 30%;
+}
+.clr{
+  padding: 0;
 }
