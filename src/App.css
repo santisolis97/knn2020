@@ -111,7 +111,11 @@ tr, th{
 .cls{
   font-weight: normal;
   width: 30%;
+  color: white;
 }
 .clr{
   padding: 0;
+}
+.verde{
+  color: greenyellow;
 }

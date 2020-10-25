@@ -18,6 +18,7 @@ class App extends React.Component {
       gridElements: [],
       codeString: "",
       kFactors: [],
+      Maxs: [],
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -224,18 +225,28 @@ class App extends React.Component {
           var gridElements = response.data.gridElements;
           var testElements = response.data.testElements;
           this.setState({ testElements, gridElements });
-          console.log(this.state.testElements);
           var testEl = this.state.testElements;
           this.setState({ testEl });
-          console.log(this.state.testEl);
           var kFactors = response.data.kfactor;
           this.setState({ kFactors });
+          console.log("los kFactors son: ", this.state.kFactors);
+          var maxAccu = Math.max.apply(Math, this.state.kFactors);
+          this.setState({ maxAccu });
+          console.log("la max Accu es: ", this.state.maxAccu);
+          var Maxs = [];
+          for (var h = 0; h < this.state.kFactors.length; h++) {
+            if (this.state.kFactors[h] === this.state.maxAccu) {
+              Maxs.push(h + 1);
+            }
+          }
+          console.log("Los mejores k son: ", Maxs);
           var clases1 = [];
           for (var i = 0; i < testElements.length; i++) {
             if (!clases1.includes(testElements[i].clase)) {
               clases1.push(testElements[i].clase);
             }
           }
+          this.setState({ Maxs });
           var clases2 = [];
           for (i = 0; i < gridElements.length; i++) {
             if (!clases2.includes(gridElements[i].clase)) {
@@ -247,11 +258,9 @@ class App extends React.Component {
 
           gridElements = this.addColor(gridElements, clases);
           testElements = this.addColor(testElements, clases);
-          console.log(this.state.testElements);
           var usedColors = this.getUsedColors(this.state.clases);
           this.setState({ testElements, gridElements });
           this.setState({ usedColors });
-          console.log(this.state);
           document
             .getElementById("wrapper")
             .scrollIntoView({ behavior: "smooth", block: "start" });
@@ -353,13 +362,19 @@ class App extends React.Component {
               <div className="tabla">
                 <p>
                   El valor de coherencia para K = {this.state.kValue} es de{" "}
-                  {this.state.kFactors[this.state.kValue - 1]}
+                  <span className="verde">
+                    {this.state.kFactors[this.state.kValue - 1]}
+                  </span>
                 </p>
                 <table className="table table-dark table-sm table-striped">
-                  <thead>
+                  <thead className="thead-light">
                     <tr>
-                      <th scope="col">Clase</th>
-                      <th scope="col">Color</th>
+                      <th style={{ color: "black" }} scope="col">
+                        Clase
+                      </th>
+                      <th style={{ color: "black" }} scope="col">
+                        Color
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -396,24 +411,57 @@ class App extends React.Component {
                 </XYPlot>
               </div>
             )}
-            <table className="table table-dark table-sm table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">K</th>
-                  <th scope="col">Accuracy</th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.state.kFactors.map((value, index) => {
-                  return (
-                    <tr key={index}>
-                      <th className="cls">{index + 1}</th>
-                      <th className="clr">{value}</th>
+            {this.state.gridElements.length > 0 && (
+              <div>
+                <h3>
+                  los k con mayor coherencia son: <br />
+                  {this.state.Maxs.map((value, i) => {
+                    return (
+                      <b key={i}>
+                        k = <span className="verde">{value}</span>
+                        {this.state.Maxs[i + 1] ? ", " : ". "}
+                      </b>
+                    );
+                  })}
+                </h3>
+                <table className="table table-dark table-sm table-striped">
+                  <thead className="thead-light">
+                    <tr>
+                      <th style={{ color: "black" }} scope="col">
+                        K
+                      </th>
+                      <th style={{ color: "black" }} scope="col">
+                        Accuracy
+                      </th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {this.state.kFactors.map((value, index) => {
+                      return (
+                        <tr key={index}>
+                          <th
+                            className="cls"
+                            className={
+                              value === this.state.maxAccu ? "verde" : ""
+                            }
+                          >
+                            {index + 1}
+                          </th>
+                          <th
+                            className="cls"
+                            className={
+                              value === this.state.maxAccu ? "verde" : ""
+                            }
+                          >
+                            {value}
+                          </th>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>
