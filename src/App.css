@@ -119,3 +119,18 @@ tr, th{
 .verde{
   color: greenyellow;
 }
+.IA{
+  position: absolute;
+     bottom: 0px;
+     right: 10px;
+}
+input, textarea{
+  border-radius: 5px!important;
+  padding-left: 15px;
+}
+button{
+  position: absolute;
+     bottom: 30px;
+     right: 0px;
+
+}

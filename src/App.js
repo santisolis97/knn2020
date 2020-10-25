@@ -35,6 +35,7 @@ class App extends React.Component {
       "darkgray",
     ];
     this.setState({ colores });
+    this.setState({ loading: false });
   }
 
   csvToArray(strData, strDelimiter) {
@@ -125,6 +126,7 @@ class App extends React.Component {
     elementos = JSON.parse(elementos);
     return elementos;
   }
+
   addClase(elements, clases) {
     for (var i = 0; i < elements.length; i++) {
       if (elements[i].clase === "deepPink") {
@@ -182,6 +184,7 @@ class App extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    this.setState({ loading: true });
     const dataxios = new FormData(event.target);
     var kValue = dataxios.get("kValue");
     this.setState({ kValue });
@@ -211,6 +214,7 @@ class App extends React.Component {
       // console.log(json);
       axios(config)
         .then((response) => {
+          this.setState({ loading: false });
           var gridElements = response.data.gridElements;
           var testElements = response.data.testElements;
           this.setState({ testElements, gridElements });
@@ -244,7 +248,6 @@ class App extends React.Component {
           }
           var clases = this.getClases(clases1, clases2);
           this.setState({ clases });
-
           gridElements = this.addColor(gridElements, clases);
           testElements = this.addColor(testElements, clases);
           var usedColors = this.getUsedColors(this.state.clases);
@@ -275,6 +278,7 @@ class App extends React.Component {
       };
       axios(configDraw)
         .then((response) => {
+          this.setState({ loading: false });
           var gridElements = response.data.gridElements;
           var testElements = response.data.testElements;
           var kFactor = response.data.kfactor;
@@ -310,6 +314,9 @@ class App extends React.Component {
       <div className="App">
         <header>Knn-Algorithm</header>
         <div className="App-body container-fluid">
+          <div className="IA">
+            Inteligencia Artificial - UTN FRRe 2020 - Grupo 8
+          </div>
           <div className="landing">
             <form className="container-fluid" onSubmit={this.handleSubmit}>
               <div className="row">
@@ -327,19 +334,36 @@ class App extends React.Component {
                 <div className="col">
                   <div className="form-group">
                     <p>Insert k:</p>
-                    <input type="number" name="kValue"></input>
+                    <input
+                      className="container-fluid"
+                      type="number"
+                      name="kValue"
+                    ></input>
                   </div>
                   <div className="form-group">
                     <p>Insert xDivision:</p>
-                    <input type="number" name="xDivision"></input>
+                    <input
+                      className="container-fluid"
+                      type="number"
+                      name="xDivision"
+                    ></input>
                   </div>
                   <div className="form-group">
                     <p>Insert yDivision:</p>
 
-                    <input type="number" name="yDivision"></input>
+                    <input
+                      className="container-fluid"
+                      type="number"
+                      name="yDivision"
+                    ></input>
                   </div>
-                  <button type="submit" className="btn btn-success">
-                    Classify
+                  <button type="submit" className="btn btn-success container">
+                    {!this.state.loading && <span>Classify</span>}
+                    {this.state.loading && (
+                      <div className="spinner-border text-light" role="status">
+                        <span className="sr-only">Loading...</span>
+                      </div>
+                    )}
                   </button>
                 </div>
               </div>
