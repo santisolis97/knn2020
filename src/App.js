@@ -3,8 +3,6 @@ import "./App.css";
 import "../node_modules/react-vis/dist/style.css";
 import { HeatmapSeries, MarkSeries, XYPlot, XAxis, YAxis } from "react-vis";
 import axios from "axios";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import { docco } from "react-syntax-highlighter/dist/esm/styles/hljs";
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -163,15 +161,7 @@ class App extends React.Component {
 
     return elements;
   }
-  addColor(elements, clases) {
-    for (var i = 0; i < elements.length; i++) {
-      elements[i].clase = this.state.colores[clases.indexOf(elements[i].clase)];
-    }
-    var elementos = JSON.stringify(elements);
-    elementos = elementos.replaceAll("clase", "color");
-    elementos = JSON.parse(elementos);
-    return elementos;
-  }
+
   getUsedColors(clases) {
     var usedColors = [];
     for (var j = 0; j < clases.length; j++) {
@@ -209,8 +199,7 @@ class App extends React.Component {
     var json = JSON.parse(csv);
     var data = JSON.stringify(json);
     if (this.state.value !== this.state.prevDataset) {
-      console.log("entra aca de nuevo gil");
-      this.state.prevDataset = this.state.value;
+      this.setState({ prevDataset: this.state.value });
       var config = {
         method: "post",
         url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
@@ -440,17 +429,17 @@ class App extends React.Component {
                       return (
                         <tr key={index}>
                           <th
-                            className="cls"
                             className={
-                              value === this.state.maxAccu ? "verde" : ""
+                              ("cls",
+                              value === this.state.maxAccu ? "verde" : "")
                             }
                           >
                             {index + 1}
                           </th>
                           <th
-                            className="cls"
                             className={
-                              value === this.state.maxAccu ? "verde" : ""
+                              ("cls",
+                              value === this.state.maxAccu ? "verde" : "")
                             }
                           >
                             {value}
