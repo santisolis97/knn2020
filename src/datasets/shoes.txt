@@ -1,4 +1,4 @@
-x1;x2;Clase
+shoe size;height;class
 8.518110459;73.02945995;seniors
 10.30152657;68.95967699;seniors
 7.386575344;73.55804245;seniors

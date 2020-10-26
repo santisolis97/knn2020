@@ -17,6 +17,8 @@ class App extends React.Component {
       codeString: "",
       kFactors: [],
       Maxs: [],
+      firstAtt: "",
+      secAtt: "",
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -104,6 +106,7 @@ class App extends React.Component {
       objArray[i - 1] = {};
       for (var k = 0; k < array[0].length && k < array[i].length; k++) {
         var key = array[0][k];
+
         objArray[i - 1][key] = array[i][k];
       }
     }
@@ -198,11 +201,21 @@ class App extends React.Component {
     this.setState({ kValue });
     var xDivision = dataxios.get("xDivision");
     var yDivision = dataxios.get("yDivision");
-
+    var firstRow = this.state.value.split("\n")[0];
+    var firstAtt = firstRow.split(";")[0];
+    var secAtt = firstRow.split(";")[1];
+    var classAtt = firstRow.split(";")[2];
+    secAtt = secAtt;
+    firstAtt = firstAtt;
+    console.log("Clase attributo: ", classAtt);
+    console.log("Clase attributo: ", firstAtt);
+    console.log("Clase attributo: ", secAtt);
+    this.setState({ firstAtt });
+    this.setState({ secAtt });
     var csv = this.state.value;
-    csv = csv.replace("x1", "x");
-    csv = csv.replace("x2", "y");
-    csv = csv.replace("Clase", "clase");
+    csv = csv.replace(firstAtt, "x");
+    csv = csv.replace(secAtt, "y");
+    csv = csv.replace(classAtt, "clase");
     csv = this.csv2Json(csv);
     var json = JSON.parse(csv);
     var data = JSON.stringify(json);
@@ -382,7 +395,7 @@ class App extends React.Component {
                     ></input>
                   </div>
                   <button type="submit" className="btn btn-success container">
-                    {!this.state.loading && <span>Classify</span>}
+                    {!this.state.loading && <span>Run</span>}
                     {this.state.loading && (
                       <div className="spinner-border text-light" role="status">
                         <span className="sr-only">Loading...</span>
@@ -432,8 +445,22 @@ class App extends React.Component {
             {this.state.gridElements.length > 0 && (
               <div className="chart">
                 <XYPlot width={1000} height={600}>
-                  <XAxis />
-                  <YAxis />
+                  <XAxis
+                    title={this.state.firstAtt}
+                    style={{
+                      title: { fontSize: "25px" },
+                      color: "white",
+                    }}
+                  />
+                  <YAxis
+                    title={this.state.secAtt}
+                    style={{
+                      title: {
+                        fontSize: "25px",
+                        color: "white",
+                      },
+                    }}
+                  />
                   <HeatmapSeries
                     className="heatmap-series-example"
                     colorType="literal"
