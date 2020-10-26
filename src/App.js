@@ -171,6 +171,16 @@ class App extends React.Component {
     }
     return usedColors;
   }
+  loadDataset(x) {
+    if (x === 1) {
+    }
+    if (x === 2) {
+    }
+    if (x === 3) {
+    }
+    if (x === 4) {
+    }
+  }
   getClases(clases1, clases2) {
     var a = clases1.concat(clases2);
     var b = [];
@@ -221,6 +231,7 @@ class App extends React.Component {
           var testEl = this.state.testElements;
           this.setState({ testEl });
           var kFactors = response.data.kfactor;
+
           this.setState({ kFactors });
           console.log("los kFactors son: ", this.state.kFactors);
           var maxAccu = Math.max.apply(Math, this.state.kFactors);
@@ -233,6 +244,9 @@ class App extends React.Component {
             }
           }
           console.log("Los mejores k son: ", Maxs);
+          kFactors = kFactors.slice(0, 10);
+          this.setState({ kFactors });
+
           var clases1 = [];
           for (var i = 0; i < testElements.length; i++) {
             if (!clases1.includes(testElements[i].clase)) {
@@ -252,6 +266,8 @@ class App extends React.Component {
           testElements = this.addColor(testElements, clases);
           var usedColors = this.getUsedColors(this.state.clases);
           this.setState({ testElements, gridElements });
+          console.log("LOS TEST SON: ", this.state.testElements);
+
           this.setState({ usedColors });
           document
             .getElementById("wrapper")
@@ -301,6 +317,7 @@ class App extends React.Component {
           testElements = this.addColor(testElements, clases);
           var usedColors = this.getUsedColors(this.state.clases);
           this.setState({ testElements, gridElements });
+          console.log("LOS TEST SON: ", this.state.testElements);
           this.setState({ usedColors });
         })
         .catch(function (error) {
@@ -368,6 +385,40 @@ class App extends React.Component {
                 </div>
               </div>
             </form>
+            <div className="row datasets">
+              <div className="col">
+                <button
+                  onClick={() => this.loadDataset(1)}
+                  className="dataset btn btn-success"
+                >
+                  Dataset1
+                </button>
+              </div>
+              <div className="col">
+                <button
+                  onClick={() => this.loadDataset(2)}
+                  className="dataset btn btn-success"
+                >
+                  Dataset2
+                </button>
+              </div>
+              <div className="col">
+                <button
+                  onClick={() => this.loadDataset(3)}
+                  className="dataset btn btn-success"
+                >
+                  Dataset3
+                </button>
+              </div>
+              <div className="col">
+                <button
+                  onClick={() => this.loadDataset(4)}
+                  className="dataset btn btn-success"
+                >
+                  Dataset4
+                </button>
+              </div>
+            </div>
           </div>
 
           <div id="wrapper" className="container">
@@ -473,6 +524,10 @@ class App extends React.Component {
                     })}
                   </tbody>
                 </table>
+                <br />
+                <br />
+                <br />
+                <br />
               </div>
             )}
           </div>
