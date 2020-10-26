@@ -22,6 +22,7 @@ class App extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
   componentDidMount() {
+    // Definimos los colores para las clases
     var colores = [
       "deepPink",
       "greenYellow",
@@ -38,6 +39,7 @@ class App extends React.Component {
     this.setState({ loading: false });
   }
 
+  //Con esta funcion lo que hacemos es convertir el csv ingresado en un array para luego convertirlo en Json
   csvToArray(strData, strDelimiter) {
     // Check to see if the delimiter is defined. If not,
     // then default to comma.
@@ -94,6 +96,7 @@ class App extends React.Component {
     // Return the parsed data.
     return arrData;
   }
+  //Aqui convertimos el Array armado anteriormente, finalmente en un JSON.
   csv2Json(csv) {
     var array = this.csvToArray(csv);
     var objArray = [];
@@ -110,13 +113,14 @@ class App extends React.Component {
 
     return str;
   }
-
+  // Con handleChange manejamos los cambios que se realizan en los valores de los inputs del formulario
   handleChange(event) {
     this.setState({ value: event.target.value });
     this.setState({ k: event.target.k });
     this.setState({ xDivision: event.target.xDivision });
     this.setState({ yDivision: event.target.yDivision });
   }
+  // Con addColor lo que hacemos es realizar un cambio en los elementos a graficar para añadirles un color dependiendo de a que clase pertenecen
   addColor(elements, clases) {
     for (var i = 0; i < elements.length; i++) {
       elements[i].clase = this.state.colores[clases.indexOf(elements[i].clase)];
@@ -126,7 +130,7 @@ class App extends React.Component {
     elementos = JSON.parse(elementos);
     return elementos;
   }
-
+  // En addClase realizamos el proceso inverso a addColor
   addClase(elements, clases) {
     for (var i = 0; i < elements.length; i++) {
       if (elements[i].clase === "deepPink") {
@@ -163,7 +167,7 @@ class App extends React.Component {
 
     return elements;
   }
-
+  // getUsedColors nos devuelve los colores utilizados(segun la cantidad de clases) para luego agregarlos a la tabla de referencia
   getUsedColors(clases) {
     var usedColors = [];
     for (var j = 0; j < clases.length; j++) {
@@ -171,16 +175,8 @@ class App extends React.Component {
     }
     return usedColors;
   }
-  loadDataset(x) {
-    if (x === 1) {
-    }
-    if (x === 2) {
-    }
-    if (x === 3) {
-    }
-    if (x === 4) {
-    }
-  }
+
+  // getClases nos devuelve todas las clases posibles a la q pertenece por lo menos un elemento del dataset.
   getClases(clases1, clases2) {
     var a = clases1.concat(clases2);
     var b = [];
@@ -191,10 +187,12 @@ class App extends React.Component {
     }
     return b;
   }
-
+  // Con handleSubmit manejamos la parte de cuando el boton se presiona y hay q calcular.
   handleSubmit(event) {
     event.preventDefault();
     this.setState({ loading: true });
+
+    //Aca preparamos los valores del formulario para poder hacer la llamada a la API.
     const dataxios = new FormData(event.target);
     var kValue = dataxios.get("kValue");
     this.setState({ kValue });
@@ -206,13 +204,15 @@ class App extends React.Component {
     csv = csv.replace("x2", "y");
     csv = csv.replace("Clase", "clase");
     csv = this.csv2Json(csv);
-    // console.log(csv);
-
-    // console.log(this.csv2Json(csv));
     var json = JSON.parse(csv);
     var data = JSON.stringify(json);
+
+    // Una vez preparados los valores de los parametros, lo que hacemos con este if es preguntar si el dataset con el que se esta
+    // realizando esta corrida es igual al dataset de la corrida anterior, para asi no volver a calcular el random para definir
+    // el conjunto training y el conjunto de test.
     if (this.state.value !== this.state.prevDataset) {
       this.setState({ prevDataset: this.state.value });
+      // Preparamos la config para la llamada
       var config = {
         method: "post",
         url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
@@ -221,10 +221,11 @@ class App extends React.Component {
         },
         data: data,
       };
-      // console.log(json);
+      // Realizamos la llamada, con ayuda de la libreria Axios
       axios(config)
         .then((response) => {
           this.setState({ loading: false });
+          // Guardamos los elementos que nos devuelve la llamada (la grilla. los elementos de test calculados, y la coherencia de cada K)
           var gridElements = response.data.gridElements;
           var testElements = response.data.testElements;
           this.setState({ testElements, gridElements });
@@ -233,20 +234,22 @@ class App extends React.Component {
           var kFactors = response.data.kfactor;
 
           this.setState({ kFactors });
-          console.log("los kFactors son: ", this.state.kFactors);
+
+          // Procedemos a hallar la mayor coherencia
           var maxAccu = Math.max.apply(Math, this.state.kFactors);
           this.setState({ maxAccu });
-          console.log("la max Accu es: ", this.state.maxAccu);
+          // Aqui creamos un array "Maxs" donde almacenamos para que valores de K se obtiene el maximo de coherencia.
           var Maxs = [];
           for (var h = 0; h < this.state.kFactors.length; h++) {
             if (this.state.kFactors[h] === this.state.maxAccu) {
               Maxs.push(h + 1);
             }
           }
-          console.log("Los mejores k son: ", Maxs);
+          // Cortamos el array de las coherencias de los K a 10 para poder mostrarlos en una tabla
           kFactors = kFactors.slice(0, 10);
           this.setState({ kFactors });
 
+          // Aca ya pasamos a preparar los datos para el formato que deben tener para que parsee la libreria que grafica.
           var clases1 = [];
           for (var i = 0; i < testElements.length; i++) {
             if (!clases1.includes(testElements[i].clase)) {
@@ -277,13 +280,17 @@ class App extends React.Component {
           console.log(error);
         });
     } else {
-      console.log(this.state.kFactors);
+      // En el else tratamos el caso de cuando el dataset con el que se quiere realizar la corrida es el mismo con el cual se realizo la
+      // corrida anterior. Entonces no se vuelve a calcular el conjunto de test y de training
+
       var testElem = this.addClase(this.state.testEl, this.state.clases);
       var dataDraw = {
         dataSet: json,
         testElements: testElem,
       };
       console.log(dataDraw);
+      // Basicamente el proceso es el mismo que el anterior, con la diferencia de que el backend de esta llamada no vuelve a calcular
+      // los conjuntos de trainint y test.
       var configDraw = {
         method: "post",
         url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
@@ -385,40 +392,6 @@ class App extends React.Component {
                 </div>
               </div>
             </form>
-            <div className="row datasets">
-              <div className="col">
-                <button
-                  onClick={() => this.loadDataset(1)}
-                  className="dataset btn btn-success"
-                >
-                  Dataset1
-                </button>
-              </div>
-              <div className="col">
-                <button
-                  onClick={() => this.loadDataset(2)}
-                  className="dataset btn btn-success"
-                >
-                  Dataset2
-                </button>
-              </div>
-              <div className="col">
-                <button
-                  onClick={() => this.loadDataset(3)}
-                  className="dataset btn btn-success"
-                >
-                  Dataset3
-                </button>
-              </div>
-              <div className="col">
-                <button
-                  onClick={() => this.loadDataset(4)}
-                  className="dataset btn btn-success"
-                >
-                  Dataset4
-                </button>
-              </div>
-            </div>
           </div>
 
           <div id="wrapper" className="container">
@@ -482,7 +455,10 @@ class App extends React.Component {
                   {this.state.Maxs.map((value, i) => {
                     return (
                       <b key={i}>
-                        k = <span className="verde">{value}</span>
+                        k ={" "}
+                        <span className="verde">
+                          {value}({this.state.maxAccu})
+                        </span>
                         {this.state.Maxs[i + 1] ? ", " : ". "}
                       </b>
                     );
