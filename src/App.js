@@ -1,7 +1,15 @@
 import React from "react";
 import "./App.css";
 import "../node_modules/react-vis/dist/style.css";
-import { HeatmapSeries, MarkSeries, XYPlot, XAxis, YAxis } from "react-vis";
+import {
+  HeatmapSeries,
+  MarkSeries,
+  XYPlot,
+  XAxis,
+  YAxis,
+  CustomSVGSeries,
+  Highlight,
+} from "react-vis";
 import axios from "axios";
 class App extends React.Component {
   constructor(props) {
@@ -19,7 +27,10 @@ class App extends React.Component {
       Maxs: [],
       firstAtt: "",
       secAtt: "",
+      lastDrawLocation: null,
     };
+
+    console.log("MYDATA: ", this.state.myData);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -190,6 +201,15 @@ class App extends React.Component {
     }
     return b;
   }
+  addStyle(elements, clases) {
+    for (var i = 0; i < elements.length; i++) {
+      elements[i]["style"] = {
+        fill: this.state.colores[clases.indexOf(elements[i].clase)],
+        opacity: 0.6,
+      };
+    }
+    return elements;
+  }
   // Con handleSubmit manejamos la parte de cuando el boton se presiona y hay q calcular.
   handleSubmit(event) {
     event.preventDefault();
@@ -205,11 +225,6 @@ class App extends React.Component {
     var firstAtt = firstRow.split(";")[0];
     var secAtt = firstRow.split(";")[1];
     var classAtt = firstRow.split(";")[2];
-    secAtt = secAtt;
-    firstAtt = firstAtt;
-    console.log("Clase attributo: ", classAtt);
-    console.log("Clase attributo: ", firstAtt);
-    console.log("Clase attributo: ", secAtt);
     this.setState({ firstAtt });
     this.setState({ secAtt });
     var csv = this.state.value;
@@ -225,6 +240,7 @@ class App extends React.Component {
     // el conjunto training y el conjunto de test.
     if (this.state.value !== this.state.prevDataset) {
       this.setState({ prevDataset: this.state.value });
+
       // Preparamos la config para la llamada
       var config = {
         method: "post",
@@ -241,7 +257,9 @@ class App extends React.Component {
           // Guardamos los elementos que nos devuelve la llamada (la grilla. los elementos de test calculados, y la coherencia de cada K)
           var gridElements = response.data.gridElements;
           var testElements = response.data.testElements;
-          this.setState({ testElements, gridElements });
+          var trainingElements = response.data.trainingElements;
+
+          this.setState({ testElements, gridElements, trainingElements });
           var testEl = this.state.testElements;
           this.setState({ testEl });
           var kFactors = response.data.kfactor;
@@ -278,11 +296,12 @@ class App extends React.Component {
           }
           var clases = this.getClases(clases1, clases2);
           this.setState({ clases });
+          trainingElements = this.addStyle(trainingElements, clases);
           gridElements = this.addColor(gridElements, clases);
           testElements = this.addColor(testElements, clases);
           var usedColors = this.getUsedColors(this.state.clases);
-          this.setState({ testElements, gridElements });
-          console.log("LOS TEST SON: ", this.state.testElements);
+          this.setState({ testElements, gridElements, trainingElements });
+          console.log("LOS training SON: ", this.state.trainingElements);
 
           this.setState({ usedColors });
           document
@@ -317,6 +336,8 @@ class App extends React.Component {
           this.setState({ loading: false });
           var gridElements = response.data.gridElements;
           var testElements = response.data.testElements;
+          var trainingElements = response.data.trainingElements;
+
           var kFactor = response.data.kfactor;
           this.setState({ kFactor });
           var clases1 = [];
@@ -335,8 +356,9 @@ class App extends React.Component {
           this.setState({ clases });
           gridElements = this.addColor(gridElements, clases);
           testElements = this.addColor(testElements, clases);
+          trainingElements = this.addStyle(trainingElements, clases);
           var usedColors = this.getUsedColors(this.state.clases);
-          this.setState({ testElements, gridElements });
+          this.setState({ testElements, gridElements, trainingElements });
           console.log("LOS TEST SON: ", this.state.testElements);
           this.setState({ usedColors });
         })
@@ -347,6 +369,7 @@ class App extends React.Component {
   }
 
   render() {
+    const { lastDrawLocation } = this.state;
     return (
       <div className="App">
         <header>Knn-Algorithm</header>
@@ -444,12 +467,29 @@ class App extends React.Component {
             )}
             {this.state.gridElements.length > 0 && (
               <div className="chart">
-                <XYPlot width={1000} height={600}>
+                <XYPlot
+                  animation
+                  xDomain={
+                    lastDrawLocation && [
+                      lastDrawLocation.left,
+                      lastDrawLocation.right,
+                    ]
+                  }
+                  yDomain={
+                    lastDrawLocation && [
+                      lastDrawLocation.bottom,
+                      lastDrawLocation.top,
+                    ]
+                  }
+                  width={1200}
+                  height={800}
+                >
                   <XAxis
                     title={this.state.firstAtt}
                     style={{
                       title: { fontSize: "25px" },
                       color: "white",
+                      opacity: "1",
                     }}
                   />
                   <YAxis
@@ -467,10 +507,35 @@ class App extends React.Component {
                     opacity="0.1"
                     data={this.state.gridElements}
                   />
+                  <CustomSVGSeries
+                    customComponent="square"
+                    size="7"
+                    data={this.state.trainingElements}
+                  />
                   <MarkSeries
                     className="heatmap-series-example"
                     colorType="literal"
                     data={this.state.testElements}
+                    size="7"
+                    opacity=".8"
+                  />
+                  <Highlight
+                    onBrushEnd={(area) =>
+                      this.setState({ lastDrawLocation: area })
+                    }
+                    onDrag={(area) => {
+                      this.setState({
+                        lastDrawLocation: {
+                          bottom:
+                            lastDrawLocation.bottom + (area.top - area.bottom),
+                          left:
+                            lastDrawLocation.left - (area.right - area.left),
+                          right:
+                            lastDrawLocation.right - (area.right - area.left),
+                          top: lastDrawLocation.top + (area.top - area.bottom),
+                        },
+                      });
+                    }}
                   />
                 </XYPlot>
               </div>
@@ -482,14 +547,13 @@ class App extends React.Component {
                   {this.state.Maxs.map((value, i) => {
                     return (
                       <b key={i}>
-                        k ={" "}
-                        <span className="verde">
-                          {value}({this.state.maxAccu})
-                        </span>
+                        k = <span className="verde">{value}</span>
                         {this.state.Maxs[i + 1] ? ", " : ". "}
                       </b>
                     );
-                  })}
+                  })}{" "}
+                  Con<span className="verde"> {this.state.maxAccu}</span> de
+                  coherencia
                 </h3>
                 <table className="table table-dark table-sm table-striped">
                   <thead className="thead-light">
