@@ -415,7 +415,11 @@ class App extends React.Component {
                       name="yDivision"
                     ></input>
                   </div>
-                  <button type="submit" className="btn btn-success container">
+                  <button
+                    type="submit"
+                    className="btn btn-success container"
+                    disabled={this.state.loading}
+                  >
                     {!this.state.loading && <span>Run</span>}
                     {this.state.loading && (
                       <div className="spinner-border text-light" role="status">
