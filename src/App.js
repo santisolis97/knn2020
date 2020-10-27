@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
   CustomSVGSeries,
-  Highlight,
 } from "react-vis";
 import axios from "axios";
 class App extends React.Component {
@@ -369,7 +368,6 @@ class App extends React.Component {
   }
 
   render() {
-    const { lastDrawLocation } = this.state;
     return (
       <div className="App">
         <header>Knn-Algorithm</header>
@@ -467,23 +465,7 @@ class App extends React.Component {
             )}
             {this.state.gridElements.length > 0 && (
               <div className="chart">
-                <XYPlot
-                  animation
-                  xDomain={
-                    lastDrawLocation && [
-                      lastDrawLocation.left,
-                      lastDrawLocation.right,
-                    ]
-                  }
-                  yDomain={
-                    lastDrawLocation && [
-                      lastDrawLocation.bottom,
-                      lastDrawLocation.top,
-                    ]
-                  }
-                  width={1200}
-                  height={800}
-                >
+                <XYPlot width={1200} height={800}>
                   <XAxis
                     title={this.state.firstAtt}
                     style={{
@@ -518,24 +500,6 @@ class App extends React.Component {
                     data={this.state.testElements}
                     size="7"
                     opacity=".8"
-                  />
-                  <Highlight
-                    onBrushEnd={(area) =>
-                      this.setState({ lastDrawLocation: area })
-                    }
-                    onDrag={(area) => {
-                      this.setState({
-                        lastDrawLocation: {
-                          bottom:
-                            lastDrawLocation.bottom + (area.top - area.bottom),
-                          left:
-                            lastDrawLocation.left - (area.right - area.left),
-                          right:
-                            lastDrawLocation.right - (area.right - area.left),
-                          top: lastDrawLocation.top + (area.top - area.bottom),
-                        },
-                      });
-                    }}
                   />
                 </XYPlot>
               </div>
