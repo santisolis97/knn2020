@@ -128,7 +128,7 @@ input, textarea{
   border-radius: 5px!important;
   padding-left: 15px;
 }
-button{
+.btn1{
   position: absolute;
      bottom: 30px;
      right: 0px;

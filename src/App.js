@@ -216,8 +216,47 @@ class App extends React.Component {
   toggleMenu() {
     this.setState({ menu: !this.state.menu });
   }
+  handleNewK(xDiv, yDiv) {
+    return (event) => {
+      event.preventDefault();
+      const params = new FormData(event.target);
+      var kValue = params.get("kValue");
+
+      var dataDraw2 = {
+        dataSet: JSON.parse(this.state.data),
+        testElements: this.state.testElements,
+      };
+      console.log(dataDraw2);
+      var configDraw2 = {
+        method: "post",
+        url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=60&yDivision=60`,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: dataDraw2,
+      };
+      axios(configDraw2)
+        .then((response) => {
+          var gridElements = response.data.gridElements;
+          var testElements = response.data.testElements;
+          var trainingElements = response.data.trainingElements;
+          var kFactor = response.data.kfactor;
+          this.setState({ kFactor });
+          gridElements = this.addColor(gridElements, this.state.clases);
+          testElements = this.addColor(testElements, this.state.clases);
+          trainingElements = this.addStyle(trainingElements, this.state.clases);
+
+          var newK = { gridElements, trainingElements, testElements };
+          this.setState({ newK });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    };
+  }
   // Con handleSubmit manejamos la parte de cuando el boton se presiona y hay q calcular.
   handleSubmit(event) {
+    this.setState({ newK: "" });
     event.preventDefault();
     this.setState({ loading: true });
     var sets = [];
@@ -240,7 +279,7 @@ class App extends React.Component {
     csv = this.csv2Json(csv);
     var json = JSON.parse(csv);
     var data = JSON.stringify(json);
-
+    this.setState({ data });
     // Una vez preparados los valores de los parametros, lo que hacemos con este if es preguntar si el dataset con el que se esta
     // realizando esta corrida es igual al dataset de la corrida anterior, para asi no volver a calcular el random para definir
     // el conjunto training y el conjunto de test.
@@ -306,6 +345,12 @@ class App extends React.Component {
         testElements = this.addColor(testElements, clases);
         var usedColors = this.getUsedColors(this.state.clases);
         sets.push({ gridElements, trainingElements, testElements });
+        this.setState(
+          { gridElements, trainingElements, testElements },
+          function () {
+            this.handleNewK(this.state);
+          }.bind(this)
+        );
         this.setState({ usedColors });
         document
           .getElementById("wrapper")
@@ -409,7 +454,7 @@ class App extends React.Component {
                   </div>
                   <button
                     type="submit"
-                    className="btn btn-success container"
+                    className="btn btn1 btn-success container"
                     disabled={this.state.loading}
                   >
                     {!this.state.loading && <span>Run</span>}
@@ -527,8 +572,75 @@ class App extends React.Component {
                   </tbody>
                 </table>
                 <br />
-                <br />
-                <br />
+
+                <div className="newk">
+                  <form
+                    onSubmit={this.handleNewK(
+                      this.state.xDivision,
+                      this.state.yDivision
+                    )}
+                  >
+                    <div className="row">
+                      <div className="col">
+                        <div className="form-group">
+                          <p>Insert a k to render: </p>
+                          <input
+                            className="container-fluid"
+                            type="number"
+                            name="kValue"
+                          ></input>
+                        </div>
+                        <button
+                          type="submit"
+                          className="btn btn2 btn-success container"
+                        >
+                          Run
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                  {this.state.newK && (
+                    <div className="chart">
+                      <XYPlot width={800} height={800}>
+                        <XAxis
+                          title={this.state.firstAtt}
+                          style={{
+                            title: { fontSize: "25px" },
+                            color: "white",
+                            opacity: "1",
+                          }}
+                        />
+                        <YAxis
+                          title={this.state.secAtt}
+                          style={{
+                            title: {
+                              fontSize: "25px",
+                              color: "white",
+                            },
+                          }}
+                        />
+                        <HeatmapSeries
+                          className="heatmap-series-example"
+                          colorType="literal"
+                          opacity="0.1"
+                          data={this.state.newK.gridElements}
+                        />
+                        <CustomSVGSeries
+                          customComponent="square"
+                          size="7"
+                          data={this.state.newK.trainingElements}
+                        />
+                        <MarkSeries
+                          className="heatmap-series-example"
+                          colorType="literal"
+                          data={this.state.newK.testElements}
+                          size="7"
+                          opacity=".6"
+                        />
+                      </XYPlot>
+                    </div>
+                  )}
+                </div>
                 <br />
               </div>
             )}
