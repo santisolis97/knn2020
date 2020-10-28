@@ -27,11 +27,13 @@ class App extends React.Component {
       firstAtt: "",
       secAtt: "",
       lastDrawLocation: null,
+      menu: false,
     };
 
     console.log("MYDATA: ", this.state.myData);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.toggleMenu = this.toggleMenu.bind(this);
   }
   componentDidMount() {
     // Definimos los colores para las clases
@@ -209,6 +211,9 @@ class App extends React.Component {
     }
     return elements;
   }
+  toggleMenu() {
+    this.setState({ menu: !this.state.menu });
+  }
   // Con handleSubmit manejamos la parte de cuando el boton se presiona y hay q calcular.
   handleSubmit(event) {
     event.preventDefault();
@@ -300,6 +305,7 @@ class App extends React.Component {
           testElements = this.addColor(testElements, clases);
           var usedColors = this.getUsedColors(this.state.clases);
           this.setState({ testElements, gridElements, trainingElements });
+          console.log(testElements, gridElements, trainingElements);
           console.log("LOS training SON: ", this.state.trainingElements);
 
           this.setState({ usedColors });
@@ -368,6 +374,8 @@ class App extends React.Component {
   }
 
   render() {
+    const show = this.state.menu ? "show" : "";
+
     return (
       <div className="App">
         <header>Knn-Algorithm</header>
@@ -503,7 +511,7 @@ class App extends React.Component {
                     colorType="literal"
                     data={this.state.testElements}
                     size="7"
-                    opacity=".8"
+                    opacity=".6"
                   />
                 </XYPlot>
               </div>
@@ -511,17 +519,33 @@ class App extends React.Component {
             {this.state.gridElements.length > 0 && (
               <div>
                 <h3>
-                  los k con mayor coherencia son: <br />
-                  {this.state.Maxs.map((value, i) => {
-                    return (
-                      <b key={i}>
-                        k = <span className="verde">{value}</span>
-                        {this.state.Maxs[i + 1] ? ", " : ". "}
-                      </b>
-                    );
-                  })}{" "}
-                  Con<span className="verde"> {this.state.maxAccu}</span> de
-                  coherencia
+                  <div className="card bg-dark">
+                    {/* <div className="card-header"> */}
+                    <span
+                      className="collapser btn btn-secondary"
+                      onClick={this.toggleMenu}
+                    >
+                      Los k con mayor coherencia son{" "}
+                      <i class="fas fa-chevron-down"></i>{" "}
+                    </span>{" "}
+                    {/* </div> */}
+                    <div
+                      className={
+                        "collapse navbar-collapse " + show + " card-body"
+                      }
+                    >
+                      {this.state.Maxs.map((value, i) => {
+                        return (
+                          <b key={i}>
+                            k = <span className="verde">{value}</span>
+                            {this.state.Maxs[i + 1] ? ", " : ". "}
+                          </b>
+                        );
+                      })}{" "}
+                      Con<span className="verde"> {this.state.maxAccu}</span> de
+                      coherencia
+                    </div>
+                  </div>
                 </h3>
                 <table className="table table-dark table-sm table-striped">
                   <thead className="thead-light">

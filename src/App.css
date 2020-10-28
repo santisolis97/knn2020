@@ -141,3 +141,6 @@ button{
     .dataset{
       width: 200px!important;
     }
+    .collapser{
+      cursor: default;
+    }
