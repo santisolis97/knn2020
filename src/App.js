@@ -528,7 +528,7 @@ class App extends React.Component {
                               value === this.state.maxAccu ? "verde" : "")
                             }
                           >
-                            {value}
+                            {value * 100}%
                           </th>
                         </tr>
                       );
