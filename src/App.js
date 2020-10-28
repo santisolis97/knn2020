@@ -428,14 +428,6 @@ class App extends React.Component {
                 </div>
                 <div className="col">
                   <div className="form-group">
-                    <p>Insert k:</p>
-                    <input
-                      className="container-fluid"
-                      type="number"
-                      name="kValue"
-                    ></input>
-                  </div>
-                  <div className="form-group">
                     <p>Insert xDivision:</p>
                     <input
                       className="container-fluid"
