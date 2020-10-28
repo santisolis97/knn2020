@@ -461,9 +461,10 @@ class App extends React.Component {
             </form>
           </div>
 
-          <div id="wrapper" className="container">
+          <div id="wrapper" className="container-fluid">
             {this.state.usedColors.length > 0 && (
               <div className="tabla">
+                <br />
                 <p>
                   El valor de coherencia para K = {this.state.kValue} es de{" "}
                   <span className="verde">
@@ -638,9 +639,9 @@ class App extends React.Component {
             )}
             {this.state.sets.map((value, index) => {
               return (
-                <div key={index} className="chart">
+                <div key={index} className="chart col-4">
                   k={index + 1}
-                  <XYPlot width={800} height={800}>
+                  <XYPlot width={550} height={550}>
                     <XAxis
                       title={this.state.firstAtt}
                       style={{
