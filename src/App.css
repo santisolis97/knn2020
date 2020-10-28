@@ -106,6 +106,9 @@ header {
 .landing{
   height: 78vh;
 }
+hr.class-1 { 
+  border-top: 5px solid #8c8b8b; 
+}
 tr, th{
   font-size: 18px;
 }

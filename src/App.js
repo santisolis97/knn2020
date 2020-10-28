@@ -221,6 +221,8 @@ class App extends React.Component {
       event.preventDefault();
       const params = new FormData(event.target);
       var kValue = params.get("kValue");
+      var xDivision = params.get("xDivision");
+      var yDivision = params.get("yDivision");
 
       var dataDraw2 = {
         dataSet: JSON.parse(this.state.data),
@@ -229,7 +231,7 @@ class App extends React.Component {
       console.log(dataDraw2);
       var configDraw2 = {
         method: "post",
-        url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=60&yDivision=60`,
+        url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
         headers: {
           "Content-Type": "application/json",
         },
@@ -462,43 +464,12 @@ class App extends React.Component {
           </div>
 
           <div id="wrapper" className="container-fluid">
-            {this.state.usedColors.length > 0 && (
-              <div className="tabla">
-                <br />
-                <p>
-                  El valor de coherencia para K = {this.state.kValue} es de{" "}
-                  <span className="verde">
-                    {this.state.kFactors[this.state.kValue - 1]}
-                  </span>
-                </p>
-                <table className="table table-dark table-sm table-striped">
-                  <thead className="thead-light">
-                    <tr>
-                      <th style={{ color: "black" }} scope="col">
-                        Clase
-                      </th>
-                      <th style={{ color: "black" }} scope="col">
-                        Color
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {this.state.clases.map((value, index) => {
-                      return (
-                        <tr key={index}>
-                          <th className="cls">{value}</th>
-                          <th className="clr">
-                            <div className={this.state.usedColors[index]}></div>
-                          </th>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
             {this.state.sets.length > 0 && (
               <div>
+                {" "}
+                <br />
+                <br />
+                <br />
                 <h3>
                   <div className="card bg-dark">
                     {/* <div className="card-header"> */}
@@ -506,7 +477,7 @@ class App extends React.Component {
                       className="collapser btn btn-secondary"
                       onClick={this.toggleMenu}
                     >
-                      Mostrar Ks con mayor coherencia{" "}
+                      Click here to show the most accurate K values{" "}
                       <i class="fas fa-chevron-down"></i>{" "}
                     </span>{" "}
                     {/* </div> */}
@@ -565,7 +536,8 @@ class App extends React.Component {
                   </tbody>
                 </table>
                 <br />
-
+                <hr className="class-1" />
+                <br />
                 <div className="newk">
                   <form
                     onSubmit={this.handleNewK(
@@ -573,8 +545,11 @@ class App extends React.Component {
                       this.state.yDivision
                     )}
                   >
-                    <div className="row">
-                      <div className="col">
+                    <div className="row card bg-dark">
+                      <div className="card-header">
+                        Just in case you want to render with another k value
+                      </div>
+                      <div className="col card-body">
                         <div className="form-group">
                           <p>Insert a k to render: </p>
                           <input
@@ -583,104 +558,160 @@ class App extends React.Component {
                             name="kValue"
                           ></input>
                         </div>
+                        <div className="form-group">
+                          <p>Insert an xDivision to render: </p>
+                          <input
+                            className="container-fluid"
+                            type="number"
+                            name="xDivision"
+                          ></input>
+                        </div>
+                        <div className="form-group">
+                          <p>Insert a yDivision to render: </p>
+                          <input
+                            className="container-fluid"
+                            type="number"
+                            name="yDivision"
+                          ></input>
+                        </div>
                         <button
                           type="submit"
                           className="btn btn2 btn-success container"
                         >
                           Run
                         </button>
+                        {this.state.newK && (
+                          <div className="chart">
+                            <XYPlot width={800} height={800}>
+                              <XAxis
+                                title={this.state.firstAtt}
+                                style={{
+                                  title: { fontSize: "25px" },
+                                  color: "white",
+                                  opacity: "1",
+                                }}
+                              />
+                              <YAxis
+                                title={this.state.secAtt}
+                                style={{
+                                  title: {
+                                    fontSize: "25px",
+                                    color: "white",
+                                  },
+                                }}
+                              />
+                              <HeatmapSeries
+                                className="heatmap-series-example"
+                                colorType="literal"
+                                opacity="0.1"
+                                data={this.state.newK.gridElements}
+                              />
+                              <CustomSVGSeries
+                                customComponent="square"
+                                size="7"
+                                data={this.state.newK.trainingElements}
+                              />
+                              <MarkSeries
+                                className="heatmap-series-example"
+                                colorType="literal"
+                                data={this.state.newK.testElements}
+                                size="7"
+                                opacity=".6"
+                              />
+                            </XYPlot>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </form>
-                  {this.state.newK && (
-                    <div className="chart">
-                      <XYPlot width={800} height={800}>
-                        <XAxis
-                          title={this.state.firstAtt}
-                          style={{
-                            title: { fontSize: "25px" },
-                            color: "white",
-                            opacity: "1",
-                          }}
-                        />
-                        <YAxis
-                          title={this.state.secAtt}
-                          style={{
-                            title: {
-                              fontSize: "25px",
-                              color: "white",
-                            },
-                          }}
-                        />
-                        <HeatmapSeries
-                          className="heatmap-series-example"
-                          colorType="literal"
-                          opacity="0.1"
-                          data={this.state.newK.gridElements}
-                        />
-                        <CustomSVGSeries
-                          customComponent="square"
-                          size="7"
-                          data={this.state.newK.trainingElements}
-                        />
-                        <MarkSeries
-                          className="heatmap-series-example"
-                          colorType="literal"
-                          data={this.state.newK.testElements}
-                          size="7"
-                          opacity=".6"
-                        />
-                      </XYPlot>
-                    </div>
-                  )}
                 </div>
                 <br />
+                <hr className="class-1" />
+                <br />
+                <div className="card bg-dark">
+                  <div className="card-header">Charts</div>
+                  <div className="card-body">
+                    {this.state.usedColors.length > 0 && (
+                      <div className="tabla">
+                        <div class="alert alert-dark" role="alert">
+                          <i class="fas fa-info-circle"></i> The square marks
+                          represent the training dataset and the dot marks
+                          represent the testing dataset
+                        </div>
+                        <br />
+
+                        <table className="table table-dark table-sm table-striped">
+                          <thead className="thead-dark">
+                            <tr>
+                              <th scope="col">Clase</th>
+                              <th scope="col">Color</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {this.state.clases.map((value, index) => {
+                              return (
+                                <tr key={index}>
+                                  <th className="cls">{value}</th>
+                                  <th className="clr">
+                                    <div
+                                      className={this.state.usedColors[index]}
+                                    ></div>
+                                  </th>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                    {this.state.sets.map((value, index) => {
+                      return (
+                        <div key={index} className="chart col-6">
+                          k={index + 1}
+                          <XYPlot width={550} height={550}>
+                            <XAxis
+                              title={this.state.firstAtt}
+                              style={{
+                                title: { fontSize: "25px" },
+                                color: "white",
+                                opacity: "1",
+                              }}
+                            />
+                            <YAxis
+                              title={this.state.secAtt}
+                              style={{
+                                title: {
+                                  fontSize: "25px",
+                                  color: "white",
+                                },
+                              }}
+                            />
+                            <HeatmapSeries
+                              className="heatmap-series-example"
+                              colorType="literal"
+                              opacity="0.1"
+                              data={this.state.sets[index].gridElements}
+                            />
+                            <CustomSVGSeries
+                              customComponent="square"
+                              size="7"
+                              data={this.state.sets[index].trainingElements}
+                            />
+                            <MarkSeries
+                              className="heatmap-series-example"
+                              colorType="literal"
+                              data={this.state.sets[index].testElements}
+                              size="7"
+                              opacity=".6"
+                            />
+                          </XYPlot>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
-            {this.state.sets.map((value, index) => {
-              return (
-                <div key={index} className="chart col-6">
-                  k={index + 1}
-                  <XYPlot width={550} height={550}>
-                    <XAxis
-                      title={this.state.firstAtt}
-                      style={{
-                        title: { fontSize: "25px" },
-                        color: "white",
-                        opacity: "1",
-                      }}
-                    />
-                    <YAxis
-                      title={this.state.secAtt}
-                      style={{
-                        title: {
-                          fontSize: "25px",
-                          color: "white",
-                        },
-                      }}
-                    />
-                    <HeatmapSeries
-                      className="heatmap-series-example"
-                      colorType="literal"
-                      opacity="0.1"
-                      data={this.state.sets[index].gridElements}
-                    />
-                    <CustomSVGSeries
-                      customComponent="square"
-                      size="7"
-                      data={this.state.sets[index].trainingElements}
-                    />
-                    <MarkSeries
-                      className="heatmap-series-example"
-                      colorType="literal"
-                      data={this.state.sets[index].testElements}
-                      size="7"
-                      opacity=".6"
-                    />
-                  </XYPlot>
-                </div>
-              );
-            })}
           </div>
         </div>
       </div>
