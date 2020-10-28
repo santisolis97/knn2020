@@ -639,7 +639,7 @@ class App extends React.Component {
             )}
             {this.state.sets.map((value, index) => {
               return (
-                <div key={index} className="chart col-4">
+                <div key={index} className="chart col-6">
                   k={index + 1}
                   <XYPlot width={550} height={550}>
                     <XAxis
