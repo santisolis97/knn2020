@@ -28,6 +28,7 @@ class App extends React.Component {
       secAtt: "",
       lastDrawLocation: null,
       menu: false,
+      sets: [],
     };
 
     console.log("MYDATA: ", this.state.myData);
@@ -138,12 +139,12 @@ class App extends React.Component {
   // Con addColor lo que hacemos es realizar un cambio en los elementos a graficar para añadirles un color dependiendo de a que clase pertenecen
   addColor(elements, clases) {
     for (var i = 0; i < elements.length; i++) {
-      elements[i].clase = this.state.colores[clases.indexOf(elements[i].clase)];
+      elements[i].color = this.state.colores[clases.indexOf(elements[i].clase)];
     }
-    var elementos = JSON.stringify(elements);
-    elementos = elementos.replaceAll("clase", "color");
-    elementos = JSON.parse(elementos);
-    return elementos;
+    // var elementos = JSON.stringify(elements);
+    // elementos = elementos.replaceAll("clase", "color");
+    // elementos = JSON.parse(elementos);
+    return elements;
   }
   // En addClase realizamos el proceso inverso a addColor
   addClase(elements, clases) {
@@ -205,8 +206,9 @@ class App extends React.Component {
   addStyle(elements, clases) {
     for (var i = 0; i < elements.length; i++) {
       elements[i]["style"] = {
-        fill: this.state.colores[clases.indexOf(elements[i].clase)],
-        opacity: 0.6,
+        stroke: this.state.colores[clases.indexOf(elements[i].clase)],
+        fill: "black",
+        opacity: 0.3,
       };
     }
     return elements;
@@ -218,7 +220,7 @@ class App extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
     this.setState({ loading: true });
-
+    var sets = [];
     //Aca preparamos los valores del formulario para poder hacer la llamada a la API.
     const dataxios = new FormData(event.target);
     var kValue = dataxios.get("kValue");
@@ -242,135 +244,117 @@ class App extends React.Component {
     // Una vez preparados los valores de los parametros, lo que hacemos con este if es preguntar si el dataset con el que se esta
     // realizando esta corrida es igual al dataset de la corrida anterior, para asi no volver a calcular el random para definir
     // el conjunto training y el conjunto de test.
-    if (this.state.value !== this.state.prevDataset) {
-      this.setState({ prevDataset: this.state.value });
 
-      // Preparamos la config para la llamada
-      var config = {
-        method: "post",
-        url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: data,
-      };
-      // Realizamos la llamada, con ayuda de la libreria Axios
-      axios(config)
-        .then((response) => {
-          this.setState({ loading: false });
-          // Guardamos los elementos que nos devuelve la llamada (la grilla. los elementos de test calculados, y la coherencia de cada K)
-          var gridElements = response.data.gridElements;
-          var testElements = response.data.testElements;
-          var trainingElements = response.data.trainingElements;
+    // Preparamos la config para la llamada
 
-          this.setState({ testElements, gridElements, trainingElements });
-          var testEl = this.state.testElements;
-          this.setState({ testEl });
-          var kFactors = response.data.kfactor;
+    var config = {
+      method: "post",
+      url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=1&xDivision=${xDivision}&yDivision=${yDivision}`,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: data,
+    };
+    // Realizamos la llamada, con ayuda de la libreria Axios
+    axios(config)
+      .then((response) => {
+        this.setState({ loading: false });
+        // Guardamos los elementos que nos devuelve la llamada (la grilla. los elementos de test calculados, y la coherencia de cada K)
+        var gridElements = response.data.gridElements;
+        let testElements = response.data.testElements;
+        var trainingElements = response.data.trainingElements;
+        var testEl = testElements;
+        this.setState({ testEl });
+        var kFactors = response.data.kfactor;
 
-          this.setState({ kFactors });
+        this.setState({ kFactors });
 
-          // Procedemos a hallar la mayor coherencia
-          var maxAccu = Math.max.apply(Math, this.state.kFactors);
-          this.setState({ maxAccu });
-          // Aqui creamos un array "Maxs" donde almacenamos para que valores de K se obtiene el maximo de coherencia.
-          var Maxs = [];
-          for (var h = 0; h < this.state.kFactors.length; h++) {
-            if (this.state.kFactors[h] === this.state.maxAccu) {
-              Maxs.push(h + 1);
-            }
+        // Procedemos a hallar la mayor coherencia
+        var maxAccu = Math.max.apply(Math, this.state.kFactors);
+        this.setState({ maxAccu });
+        // Aqui creamos un array "Maxs" donde almacenamos para que valores de K se obtiene el maximo de coherencia.
+        var Maxs = [];
+        for (var h = 0; h < this.state.kFactors.length; h++) {
+          if (this.state.kFactors[h] === this.state.maxAccu) {
+            Maxs.push(h + 1);
           }
-          // Cortamos el array de las coherencias de los K a 10 para poder mostrarlos en una tabla
-          kFactors = kFactors.slice(0, 10);
-          this.setState({ kFactors });
+        }
+        this.setState({ Maxs });
+        // Cortamos el array de las coherencias de los K a 10 para poder mostrarlos en una tabla
+        kFactors = kFactors.slice(0, 10);
+        this.setState({ kFactors });
 
-          // Aca ya pasamos a preparar los datos para el formato que deben tener para que parsee la libreria que grafica.
-          var clases1 = [];
-          for (var i = 0; i < testElements.length; i++) {
-            if (!clases1.includes(testElements[i].clase)) {
-              clases1.push(testElements[i].clase);
-            }
+        // Aca ya pasamos a preparar los datos para el formato que deben tener para que parsee la libreria que grafica.
+        var clases1 = [];
+        for (var i = 0; i < testElements.length; i++) {
+          if (!clases1.includes(testElements[i].clase)) {
+            clases1.push(testElements[i].clase);
           }
-          this.setState({ Maxs });
-          var clases2 = [];
-          for (i = 0; i < gridElements.length; i++) {
-            if (!clases2.includes(gridElements[i].clase)) {
-              clases2.push(gridElements[i].clase);
-            }
-          }
-          var clases = this.getClases(clases1, clases2);
-          this.setState({ clases });
-          trainingElements = this.addStyle(trainingElements, clases);
-          gridElements = this.addColor(gridElements, clases);
-          testElements = this.addColor(testElements, clases);
-          var usedColors = this.getUsedColors(this.state.clases);
-          this.setState({ testElements, gridElements, trainingElements });
-          console.log(testElements, gridElements, trainingElements);
-          console.log("LOS training SON: ", this.state.trainingElements);
+        }
 
-          this.setState({ usedColors });
-          document
-            .getElementById("wrapper")
-            .scrollIntoView({ behavior: "smooth", block: "start" });
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    } else {
-      // En el else tratamos el caso de cuando el dataset con el que se quiere realizar la corrida es el mismo con el cual se realizo la
-      // corrida anterior. Entonces no se vuelve a calcular el conjunto de test y de training
-
-      var testElem = this.addClase(this.state.testEl, this.state.clases);
-      var dataDraw = {
-        dataSet: json,
-        testElements: testElem,
-      };
-      console.log(dataDraw);
-      // Basicamente el proceso es el mismo que el anterior, con la diferencia de que el backend de esta llamada no vuelve a calcular
-      // los conjuntos de trainint y test.
-      var configDraw = {
-        method: "post",
-        url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        data: dataDraw,
-      };
-      axios(configDraw)
-        .then((response) => {
-          this.setState({ loading: false });
-          var gridElements = response.data.gridElements;
-          var testElements = response.data.testElements;
-          var trainingElements = response.data.trainingElements;
-
-          var kFactor = response.data.kfactor;
-          this.setState({ kFactor });
-          var clases1 = [];
-          for (var i = 0; i < testElements.length; i++) {
-            if (!clases1.includes(testElements[i].clase)) {
-              clases1.push(testElements[i].clase);
-            }
+        var clases2 = [];
+        for (i = 0; i < gridElements.length; i++) {
+          if (!clases2.includes(gridElements[i].clase)) {
+            clases2.push(gridElements[i].clase);
           }
-          var clases2 = [];
-          for (i = 0; i < gridElements.length; i++) {
-            if (!clases2.includes(gridElements[i].clase)) {
-              clases2.push(gridElements[i].clase);
-            }
-          }
-          var clases = this.getClases(clases1, clases2);
-          this.setState({ clases });
-          gridElements = this.addColor(gridElements, clases);
-          testElements = this.addColor(testElements, clases);
-          trainingElements = this.addStyle(trainingElements, clases);
-          var usedColors = this.getUsedColors(this.state.clases);
-          this.setState({ testElements, gridElements, trainingElements });
-          console.log("LOS TEST SON: ", this.state.testElements);
-          this.setState({ usedColors });
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-    }
+        }
+        var clases = this.getClases(clases1, clases2);
+        this.setState({ clases });
+        console.log(clases);
+        trainingElements = this.addStyle(trainingElements, clases);
+        gridElements = this.addColor(gridElements, clases);
+        testElements = this.addColor(testElements, clases);
+        var usedColors = this.getUsedColors(this.state.clases);
+        sets.push({ gridElements, trainingElements, testElements });
+        this.setState({ usedColors });
+        document
+          .getElementById("wrapper")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+        for (var i = 0; i < 9; i++) {
+          var testElem = this.addClase(testElements, this.state.clases);
+          var dataDraw = {
+            dataSet: json,
+            testElements: testElem,
+          };
+
+          // Basicamente el proceso es el mismo que el anterior, con la diferencia de que el backend de esta llamada no vuelve a calcular
+          // los conjuntos de trainint y test.
+          var configDraw = {
+            method: "post",
+            url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${
+              i + 2
+            }&xDivision=${xDivision}&yDivision=${yDivision}`,
+            headers: {
+              "Content-Type": "application/json",
+            },
+            data: dataDraw,
+          };
+          axios(configDraw)
+            .then((response) => {
+              this.setState({ loading: false });
+              var gridElements = response.data.gridElements;
+              var testElements = response.data.testElements;
+              var trainingElements = response.data.trainingElements;
+              var kFactor = response.data.kfactor;
+              this.setState({ kFactor });
+              gridElements = this.addColor(gridElements, clases);
+              testElements = this.addColor(testElements, clases);
+              trainingElements = this.addStyle(trainingElements, clases);
+
+              sets.push({ gridElements, trainingElements, testElements });
+
+              this.setState({ usedColors });
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        }
+        this.setState({ sets: sets });
+        console.log(this.state.sets);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   }
 
   render() {
@@ -475,48 +459,7 @@ class App extends React.Component {
                 </table>
               </div>
             )}
-            {this.state.gridElements.length > 0 && (
-              <div className="chart">
-                <XYPlot width={1200} height={800}>
-                  <XAxis
-                    title={this.state.firstAtt}
-                    style={{
-                      title: { fontSize: "25px" },
-                      color: "white",
-                      opacity: "1",
-                    }}
-                  />
-                  <YAxis
-                    title={this.state.secAtt}
-                    style={{
-                      title: {
-                        fontSize: "25px",
-                        color: "white",
-                      },
-                    }}
-                  />
-                  <HeatmapSeries
-                    className="heatmap-series-example"
-                    colorType="literal"
-                    opacity="0.1"
-                    data={this.state.gridElements}
-                  />
-                  <CustomSVGSeries
-                    customComponent="square"
-                    size="7"
-                    data={this.state.trainingElements}
-                  />
-                  <MarkSeries
-                    className="heatmap-series-example"
-                    colorType="literal"
-                    data={this.state.testElements}
-                    size="7"
-                    opacity=".6"
-                  />
-                </XYPlot>
-              </div>
-            )}
-            {this.state.gridElements.length > 0 && (
+            {this.state.sets.length > 0 && (
               <div>
                 <h3>
                   <div className="card bg-dark">
@@ -525,7 +468,7 @@ class App extends React.Component {
                       className="collapser btn btn-secondary"
                       onClick={this.toggleMenu}
                     >
-                      Los k con mayor coherencia son{" "}
+                      Mostrar Ks con mayor coherencia{" "}
                       <i class="fas fa-chevron-down"></i>{" "}
                     </span>{" "}
                     {/* </div> */}
@@ -589,6 +532,50 @@ class App extends React.Component {
                 <br />
               </div>
             )}
+            {this.state.sets.map((value, index) => {
+              return (
+                <div key={index} className="chart">
+                  k={index + 1}
+                  <XYPlot width={800} height={800}>
+                    <XAxis
+                      title={this.state.firstAtt}
+                      style={{
+                        title: { fontSize: "25px" },
+                        color: "white",
+                        opacity: "1",
+                      }}
+                    />
+                    <YAxis
+                      title={this.state.secAtt}
+                      style={{
+                        title: {
+                          fontSize: "25px",
+                          color: "white",
+                        },
+                      }}
+                    />
+                    <HeatmapSeries
+                      className="heatmap-series-example"
+                      colorType="literal"
+                      opacity="0.1"
+                      data={this.state.sets[index].gridElements}
+                    />
+                    <CustomSVGSeries
+                      customComponent="square"
+                      size="7"
+                      data={this.state.sets[index].trainingElements}
+                    />
+                    <MarkSeries
+                      className="heatmap-series-example"
+                      colorType="literal"
+                      data={this.state.sets[index].testElements}
+                      size="7"
+                      opacity=".6"
+                    />
+                  </XYPlot>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
