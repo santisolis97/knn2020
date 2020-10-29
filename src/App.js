@@ -419,7 +419,7 @@ class App extends React.Component {
               <div className="row">
                 <div className="col">
                   <div className="form-group">
-                    <p>Insert Dataset:</p>
+                    <p>Inserte dataset:</p>
                     <textarea
                       value={this.state.value}
                       onChange={this.handleChange}
@@ -430,7 +430,7 @@ class App extends React.Component {
                 </div>
                 <div className="col">
                   <div className="form-group">
-                    <p>Insert xDivision:</p>
+                    <p>Inserte la cantidad de divisiones para el eje X</p>
                     <input
                       className="container-fluid"
                       type="number"
@@ -438,7 +438,7 @@ class App extends React.Component {
                     ></input>
                   </div>
                   <div className="form-group">
-                    <p>Insert yDivision:</p>
+                    <p>Inserte la cantidad de divisiones para el eje Y</p>
 
                     <input
                       className="container-fluid"
@@ -477,8 +477,8 @@ class App extends React.Component {
                       className="collapser btn btn-secondary"
                       onClick={this.toggleMenu}
                     >
-                      Click here to show the most accurate K values{" "}
-                      <i class="fas fa-chevron-down"></i>{" "}
+                      Click aqui para mostrar los valores de K que poseen mayor
+                      exactitud <i class="fas fa-chevron-down"></i>{" "}
                     </span>{" "}
                     {/* </div> */}
                     <div
@@ -494,8 +494,12 @@ class App extends React.Component {
                           </b>
                         );
                       })}{" "}
-                      Con<span className="verde"> {this.state.maxAccu}</span> de
-                      coherencia
+                      Con
+                      <span className="verde">
+                        {" "}
+                        {this.state.maxAccu * 100}%
+                      </span>{" "}
+                      de exactitud.
                     </div>
                   </div>
                 </h3>
@@ -506,7 +510,7 @@ class App extends React.Component {
                         K
                       </th>
                       <th style={{ color: "black" }} scope="col">
-                        Accuracy
+                        Exactitud
                       </th>
                     </tr>
                   </thead>
@@ -547,11 +551,12 @@ class App extends React.Component {
                   >
                     <div className="row card bg-dark">
                       <div className="card-header">
-                        Just in case you want to render with another k value
+                        En caso de que quieras graficar con un valor K
+                        especifico
                       </div>
                       <div className="col card-body">
                         <div className="form-group">
-                          <p>Insert a k to render: </p>
+                          <p>Inserte K: </p>
                           <input
                             className="container-fluid"
                             type="number"
@@ -559,7 +564,7 @@ class App extends React.Component {
                           ></input>
                         </div>
                         <div className="form-group">
-                          <p>Insert an xDivision to render: </p>
+                          <p>Inserte cantidad de divisiones en X: </p>
                           <input
                             className="container-fluid"
                             type="number"
@@ -567,7 +572,7 @@ class App extends React.Component {
                           ></input>
                         </div>
                         <div className="form-group">
-                          <p>Insert a yDivision to render: </p>
+                          <p>Inserte cantidad de divisiones en Y: </p>
                           <input
                             className="container-fluid"
                             type="number"
@@ -629,14 +634,18 @@ class App extends React.Component {
                 <hr className="class-1" />
                 <br />
                 <div className="card bg-dark">
-                  <div className="card-header">Charts</div>
+                  <div className="card-header">
+                    <h2>Graficos</h2>
+                    <p>Para k=1..10</p>
+                  </div>
+
                   <div className="card-body">
                     {this.state.usedColors.length > 0 && (
                       <div className="tabla">
                         <div class="alert alert-dark" role="alert">
-                          <i class="fas fa-info-circle"></i> The square marks
-                          represent the training dataset and the dot marks
-                          represent the testing dataset
+                          <i class="fas fa-info-circle"></i> Los cuadrados
+                          representan los puntos del dataset de training y los
+                          circulos a los puntos del dataset de testing
                         </div>
                         <br />
 
