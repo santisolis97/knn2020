@@ -52,6 +52,7 @@ class App extends React.Component {
     ];
     this.setState({ colores });
     this.setState({ loading: false });
+    this.setState({ loading2: false });
   }
 
   //Con esta funcion lo que hacemos es convertir el csv ingresado en un array para luego convertirlo en Json
@@ -203,6 +204,7 @@ class App extends React.Component {
     }
     return b;
   }
+  //Esta funcion formatea los elementos de training para que se muestren con el color de la clase q le corresponden, tengan relleno negro y opacidad 0.3
   addStyle(elements, clases) {
     for (var i = 0; i < elements.length; i++) {
       elements[i]["style"] = {
@@ -213,11 +215,14 @@ class App extends React.Component {
     }
     return elements;
   }
+  //ToggleMenu nada mas se usa para colapsar y mostrar los k con mayor exactitud
   toggleMenu() {
     this.setState({ menu: !this.state.menu });
   }
-  handleNewK(xDiv, yDiv) {
+  //handleNewK se utiliza para poder realizar el grafico con un nuevo k, en caso de que el usuario lo solicite
+  handleNewK() {
     return (event) => {
+      this.setState({ loading2: true });
       event.preventDefault();
       const params = new FormData(event.target);
       var kValue = params.get("kValue");
@@ -231,7 +236,7 @@ class App extends React.Component {
       console.log(dataDraw2);
       var configDraw2 = {
         method: "post",
-        url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
+        url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
         headers: {
           "Content-Type": "application/json",
         },
@@ -239,6 +244,8 @@ class App extends React.Component {
       };
       axios(configDraw2)
         .then((response) => {
+          this.setState({ loading2: false });
+
           var gridElements = response.data.gridElements;
           var testElements = response.data.testElements;
           var trainingElements = response.data.trainingElements;
@@ -290,7 +297,7 @@ class App extends React.Component {
 
     var config = {
       method: "post",
-      url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=1&xDivision=${xDivision}&yDivision=${yDivision}`,
+      url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=1&xDivision=${xDivision}&yDivision=${yDivision}`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -368,7 +375,7 @@ class App extends React.Component {
           // los conjuntos de trainint y test.
           var configDraw = {
             method: "post",
-            url: `https://ia-knn.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${
+            url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${
               i + 2
             }&xDivision=${xDivision}&yDivision=${yDivision}`,
             headers: {
@@ -582,8 +589,17 @@ class App extends React.Component {
                         <button
                           type="submit"
                           className="btn btn2 btn-success container"
+                          disabled={this.state.loading2}
                         >
-                          Run
+                          {!this.state.loading2 && <span>Run</span>}
+                          {this.state.loading2 && (
+                            <div
+                              className="spinner-border text-light"
+                              role="status"
+                            >
+                              <span className="sr-only">Loading...</span>
+                            </div>
+                          )}
                         </button>
                         {this.state.newK && (
                           <div className="chart">
