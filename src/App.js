@@ -221,10 +221,11 @@ class App extends React.Component {
   //handleNewK se utiliza para poder realizar el grafico con un nuevo k, en caso de que el usuario lo solicite
   handleNewK() {
     return (event) => {
+      var kValue = 0;
       this.setState({ loading2: true });
       event.preventDefault();
       const params = new FormData(event.target);
-      var kValue = params.get("kValue");
+      kValue = params.get("kValue");
       var xDivision = params.get("xDivision");
       var yDivision = params.get("yDivision");
 
@@ -274,6 +275,7 @@ class App extends React.Component {
     this.setState({ kValue });
     var xDivision = dataxios.get("xDivision");
     var yDivision = dataxios.get("yDivision");
+    var trainingSize = dataxios.get("trainingSize");
     var firstRow = this.state.value.split("\n")[0];
     var firstAtt = firstRow.split(";")[0];
     var secAtt = firstRow.split(";")[1];
@@ -296,7 +298,7 @@ class App extends React.Component {
 
     var config = {
       method: "post",
-      url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
+      url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}&trainingSize=${trainingSize}`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -421,6 +423,17 @@ class App extends React.Component {
                       name="kValue"
                     ></input>
                   </div>
+                  <div className="form-group">
+                    <p>
+                      Inserte porcentaje a utilizar para entrenamiento (entre 2
+                      y 99):
+                    </p>
+                    <input
+                      className="container-fluid"
+                      type="number"
+                      name="trainingSize"
+                    ></input>
+                  </div>
                   <button
                     type="submit"
                     className="btn btn1 btn-success container"
@@ -531,6 +544,10 @@ class App extends React.Component {
                       <div className="row card bg-dark">
                         <div className="col card-body">
                           <div className="form-group">
+                            <p>
+                              En caso de que desee realizar un nuevo grafico:
+                            </p>
+
                             <p>Inserte K: </p>
                             <input
                               className="container-fluid"
