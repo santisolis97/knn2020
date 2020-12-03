@@ -244,7 +244,7 @@ class App extends React.Component {
       axios(configDraw2)
         .then((response) => {
           this.setState({ loading2: false });
-
+          var newK = this.state.sets;
           var gridElements = response.data.gridElements;
           var testElements = response.data.testElements;
           var trainingElements = response.data.trainingElements;
@@ -253,8 +253,8 @@ class App extends React.Component {
           gridElements = this.addColor(gridElements, this.state.clases);
           testElements = this.addColor(testElements, this.state.clases);
           trainingElements = this.addStyle(trainingElements, this.state.clases);
-
-          var newK = { gridElements, trainingElements, testElements };
+          newK.push({ gridElements, trainingElements, testElements, kValue });
+          this.setState({ sets: newK });
           this.setState({ newK });
         })
         .catch(function (error) {
@@ -296,7 +296,7 @@ class App extends React.Component {
 
     var config = {
       method: "post",
-      url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=1&xDivision=${xDivision}&yDivision=${yDivision}`,
+      url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
       headers: {
         "Content-Type": "application/json",
       },
@@ -351,7 +351,7 @@ class App extends React.Component {
         gridElements = this.addColor(gridElements, clases);
         testElements = this.addColor(testElements, clases);
         var usedColors = this.getUsedColors(this.state.clases);
-        sets.push({ gridElements, trainingElements, testElements });
+        sets.push({ gridElements, trainingElements, testElements, kValue });
         this.setState(
           { gridElements, trainingElements, testElements },
           function () {
@@ -362,45 +362,7 @@ class App extends React.Component {
         document
           .getElementById("wrapper")
           .scrollIntoView({ behavior: "smooth", block: "start" });
-        for (var i = 0; i < 9; i++) {
-          var testElem = this.addClase(testElements, this.state.clases);
-          var dataDraw = {
-            dataSet: json,
-            testElements: testElem,
-          };
 
-          // Basicamente el proceso es el mismo que el anterior, con la diferencia de que el backend de esta llamada no vuelve a calcular
-          // los conjuntos de trainint y test.
-          var configDraw = {
-            method: "post",
-            url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${
-              i + 2
-            }&xDivision=${xDivision}&yDivision=${yDivision}`,
-            headers: {
-              "Content-Type": "application/json",
-            },
-            data: dataDraw,
-          };
-          axios(configDraw)
-            .then((response) => {
-              this.setState({ loading: false });
-              var gridElements = response.data.gridElements;
-              var testElements = response.data.testElements;
-              var trainingElements = response.data.trainingElements;
-              var kFactor = response.data.kfactor;
-              this.setState({ kFactor });
-              gridElements = this.addColor(gridElements, clases);
-              testElements = this.addColor(testElements, clases);
-              trainingElements = this.addStyle(trainingElements, clases);
-
-              sets.push({ gridElements, trainingElements, testElements });
-
-              this.setState({ usedColors });
-            })
-            .catch(function (error) {
-              console.log(error);
-            });
-        }
         this.setState({ sets: sets });
         console.log(this.state.sets);
       })
@@ -449,6 +411,14 @@ class App extends React.Component {
                       className="container-fluid"
                       type="number"
                       name="yDivision"
+                    ></input>
+                  </div>
+                  <div className="form-group">
+                    <p>Inserte K:</p>
+                    <input
+                      className="container-fluid"
+                      type="number"
+                      name="kValue"
                     ></input>
                   </div>
                   <button
@@ -547,110 +517,61 @@ class App extends React.Component {
                 <br />
                 <hr className="class-1" />
                 <br />
-                <div className="newk">
-                  <form
-                    onSubmit={this.handleNewK(
-                      this.state.xDivision,
-                      this.state.yDivision
-                    )}
-                  >
-                    <div className="row card bg-dark">
-                      <div className="card-header">
-                        En caso de que quieras graficar con un valor K
-                        especifico
-                      </div>
-                      <div className="col card-body">
-                        <div className="form-group">
-                          <p>Inserte K: </p>
-                          <input
-                            className="container-fluid"
-                            type="number"
-                            name="kValue"
-                          ></input>
-                        </div>
-                        <div className="form-group">
-                          <p>Inserte cantidad de divisiones en X: </p>
-                          <input
-                            className="container-fluid"
-                            type="number"
-                            name="xDivision"
-                          ></input>
-                        </div>
-                        <div className="form-group">
-                          <p>Inserte cantidad de divisiones en Y: </p>
-                          <input
-                            className="container-fluid"
-                            type="number"
-                            name="yDivision"
-                          ></input>
-                        </div>
-                        <button
-                          type="submit"
-                          className="btn btn2 btn-success container"
-                          disabled={this.state.loading2}
-                        >
-                          {!this.state.loading2 && <span>Run</span>}
-                          {this.state.loading2 && (
-                            <div
-                              className="spinner-border text-light"
-                              role="status"
-                            >
-                              <span className="sr-only">Loading...</span>
-                            </div>
-                          )}
-                        </button>
-                        {this.state.newK && (
-                          <div className="chart">
-                            <XYPlot width={800} height={800}>
-                              <XAxis
-                                title={this.state.firstAtt}
-                                style={{
-                                  title: { fontSize: "25px" },
-                                  color: "white",
-                                  opacity: "1",
-                                }}
-                              />
-                              <YAxis
-                                title={this.state.secAtt}
-                                style={{
-                                  title: {
-                                    fontSize: "25px",
-                                    color: "white",
-                                  },
-                                }}
-                              />
-                              <HeatmapSeries
-                                className="heatmap-series-example"
-                                colorType="literal"
-                                opacity="0.1"
-                                data={this.state.newK.gridElements}
-                              />
-                              <CustomSVGSeries
-                                customComponent="square"
-                                size="7"
-                                data={this.state.newK.trainingElements}
-                              />
-                              <MarkSeries
-                                className="heatmap-series-example"
-                                colorType="literal"
-                                data={this.state.newK.testElements}
-                                size="7"
-                                opacity=".6"
-                              />
-                            </XYPlot>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </form>
-                </div>
-                <br />
-                <hr className="class-1" />
+                <div className="newk"></div>
                 <br />
                 <div className="card bg-dark">
                   <div className="card-header">
                     <h2>Graficos</h2>
-                    <p>Para k=1..10</p>
+                    <form
+                      onSubmit={this.handleNewK(
+                        this.state.xDivision,
+                        this.state.yDivision
+                      )}
+                    >
+                      <div className="row card bg-dark">
+                        <div className="col card-body">
+                          <div className="form-group">
+                            <p>Inserte K: </p>
+                            <input
+                              className="container-fluid"
+                              type="number"
+                              name="kValue"
+                            ></input>
+                          </div>
+                          <div className="form-group">
+                            <p>Inserte cantidad de divisiones en X: </p>
+                            <input
+                              className="container-fluid"
+                              type="number"
+                              name="xDivision"
+                            ></input>
+                          </div>
+                          <div className="form-group">
+                            <p>Inserte cantidad de divisiones en Y: </p>
+                            <input
+                              className="container-fluid"
+                              type="number"
+                              name="yDivision"
+                            ></input>
+                          </div>
+                          <button
+                            type="submit"
+                            className="btn btn2 btn-success container"
+                            disabled={this.state.loading2}
+                          >
+                            {!this.state.loading2 && <span>Run</span>}
+                            {this.state.loading2 && (
+                              <div
+                                className="spinner-border text-light"
+                                role="status"
+                              >
+                                <span className="sr-only">Loading...</span>
+                              </div>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </form>
                   </div>
 
                   <div className="card-body">
@@ -690,7 +611,7 @@ class App extends React.Component {
                     {this.state.sets.map((value, index) => {
                       return (
                         <div key={index} className="chart col-6">
-                          k={index + 1}
+                          k={this.state.sets[index].kValue}
                           <XYPlot width={550} height={550}>
                             <XAxis
                               title={this.state.firstAtt}
