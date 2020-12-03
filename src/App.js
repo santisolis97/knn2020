@@ -31,7 +31,6 @@ class App extends React.Component {
       sets: [],
     };
 
-    console.log("MYDATA: ", this.state.myData);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
@@ -348,7 +347,6 @@ class App extends React.Component {
         }
         var clases = this.getClases(clases1, clases2);
         this.setState({ clases });
-        console.log(clases);
         trainingElements = this.addStyle(trainingElements, clases);
         gridElements = this.addColor(gridElements, clases);
         testElements = this.addColor(testElements, clases);

@@ -3,7 +3,7 @@ This project is the final assignment for the subject "Artificial Intelligence" f
 
 ## Usage
 
-The application is currently deployed in the following URL: https://knn-2020.herokuapp.com
+The application is currently deployed in the following URL: https://knn2020-frontend.herokuapp.com
 In the case you want to use the application, the dataset must be loaded with this format
 ```bash
 x1;x2;Clase
@@ -11,11 +11,9 @@ x1;x2;Clase
 4.87276833;4.245674;C1
 3.8164922;7.67677847;C1
 ```
-The only thing that matters is that the first row must use that format. 
-```bash
-x1;x2;Clase
+
 ```
-And the delimter must be the ';'
+The delimter must be the ';'
 
 ## Built with
 
