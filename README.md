@@ -4,10 +4,10 @@ Este es el repositorio del front-end de la aplicación.
 El Backend lo puede encontrar en: https://github.com/EdgarCardozo/ia-knn
 
 
-## Usage
+## Uso
 
 La aplicación se encuentra desplegada en: https://knn2020-frontend.herokuapp.com
-En caso de que quieras usar la aplicación, el formato dataset debe estar en formato CSV con el siguiente formato:\
+En caso de que quieras usar la aplicación, el formato dataset debe estar en formato CSV con el siguiente formato, sin importar el nombre de los atributos(puede ser cualquiera)\
 ![Alt text](formatoCSV.png?raw=true "formato")
 
 
