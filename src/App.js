@@ -62,7 +62,7 @@ class App extends React.Component {
   csvToArray(strData, strDelimiter) {
     // Check to see if the delimiter is defined. If not,
     // then default to comma.
-    strDelimiter = strDelimiter || ",";
+    strDelimiter = strDelimiter || ";";
     // Create a regular expression to parse the CSV values.
     var objPattern = new RegExp(
       // Delimiters.
@@ -237,7 +237,6 @@ class App extends React.Component {
         dataSet: JSON.parse(this.state.data),
         testElements: this.state.testElements,
       };
-      console.log(dataDraw2);
       var configDraw2 = {
         method: "post",
         url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/draw-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}`,
@@ -276,7 +275,6 @@ class App extends React.Component {
       r.onload = function (e) {
         var contents = e.target.result;
         self.setState({ contents: contents });
-        console.log(contents);
       };
       r.readAsText(f);
     } else {
@@ -303,14 +301,15 @@ class App extends React.Component {
     var classAtt = firstRow.split(";")[2];
     this.setState({ firstAtt });
     this.setState({ secAtt });
-    console.log(this.state.contents);
     var csv = this.state.contents;
     csv = csv.replace(firstAtt, "x");
     csv = csv.replace(secAtt, "y");
     csv = csv.replace(classAtt, "clase");
     csv = this.csv2Json(csv);
+    console.log(csv);
     var json = JSON.parse(csv);
     var data = JSON.stringify(json);
+    console.log(data);
     this.setState({ data });
     // Una vez preparados los valores de los parametros, lo que hacemos con este if es preguntar si el dataset con el que se esta
     // realizando esta corrida es igual al dataset de la corrida anterior, para asi no volver a calcular el random para definir
@@ -388,7 +387,6 @@ class App extends React.Component {
           .scrollIntoView({ behavior: "smooth", block: "start" });
 
         this.setState({ sets: sets });
-        console.log(this.state.sets);
       })
       .catch(function (error) {
         console.log(error);
@@ -467,7 +465,7 @@ class App extends React.Component {
                   <button
                     type="submit"
                     className="btn btn1 btn-success container"
-                    disabled={this.state.loading}
+                    disabled={this.state.loading || !this.state.contents}
                   >
                     {!this.state.loading && <span>Run</span>}
                     {this.state.loading && (
