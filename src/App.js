@@ -34,8 +34,12 @@ class App extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
+    this.readSingleFile = this.readSingleFile.bind(this);
   }
   componentDidMount() {
+    document
+      .getElementById("fileinput")
+      .addEventListener("change", this.readSingleFile, false);
     // Definimos los colores para las clases
     var colores = [
       "deepPink",
@@ -263,6 +267,23 @@ class App extends React.Component {
         });
     };
   }
+  readSingleFile(evt) {
+    //Retrieve the first (and only!) File from the FileList object
+    var f = evt.target.files[0];
+    var self = this;
+    if (f) {
+      var r = new FileReader();
+      r.onload = function (e) {
+        var contents = e.target.result;
+        self.setState({ contents: contents });
+        console.log(contents);
+      };
+      r.readAsText(f);
+    } else {
+      alert("Failed to load file");
+    }
+  }
+
   // Con handleSubmit manejamos la parte de cuando el boton se presiona y hay q calcular.
   handleSubmit(event) {
     this.setState({ newK: "" });
@@ -276,13 +297,14 @@ class App extends React.Component {
     var xDivision = dataxios.get("xDivision");
     var yDivision = dataxios.get("yDivision");
     var trainingSize = dataxios.get("trainingSize");
-    var firstRow = this.state.value.split("\n")[0];
+    var firstRow = this.state.contents.split("\n")[0];
     var firstAtt = firstRow.split(";")[0];
     var secAtt = firstRow.split(";")[1];
     var classAtt = firstRow.split(";")[2];
     this.setState({ firstAtt });
     this.setState({ secAtt });
-    var csv = this.state.value;
+    console.log(this.state.contents);
+    var csv = this.state.contents;
     csv = csv.replace(firstAtt, "x");
     csv = csv.replace(secAtt, "y");
     csv = csv.replace(classAtt, "clase");
@@ -389,12 +411,20 @@ class App extends React.Component {
                 <div className="col">
                   <div className="form-group">
                     <p>Inserte dataset:</p>
-                    <textarea
-                      value={this.state.value}
-                      onChange={this.handleChange}
-                      cols="50"
-                      rows="10"
-                    ></textarea>
+                    <input id="fileinput" name="csv" type="file"></input>
+                    <br />
+                    <br />
+                    <br />
+
+                    <i className="far fa-question-circle d-flex justify-content-start">
+                      <a
+                        className="anchor"
+                        href="https://github.com/santisolis97/knn2020/blob/master/README.md"
+                        target="_blank"
+                      >
+                        <p className="ayuda"> Ayuda</p>
+                      </a>
+                    </i>
                   </div>
                 </div>
                 <div className="col">
@@ -466,7 +496,7 @@ class App extends React.Component {
                       onClick={this.toggleMenu}
                     >
                       Click aqui para mostrar los valores de K que poseen mayor
-                      exactitud <i class="fas fa-chevron-down"></i>{" "}
+                      exactitud <i className="fas fa-chevron-down"></i>{" "}
                     </span>{" "}
                     {/* </div> */}
                     <div

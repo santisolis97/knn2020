@@ -148,3 +148,19 @@ input, textarea{
     .collapser{
       cursor: default;
     }
+    i{
+      margin-left: 130px;
+    }
+
+    .ayuda{
+      margin-left: 10px;
+    }
+
+    .anchor{
+      color: white;
+      text-decoration: none !important;
+    }
+    .anchor:hover{
+      color: rgba(255, 255, 255, 0.699);
+      text-decoration: none !important;
+    }
