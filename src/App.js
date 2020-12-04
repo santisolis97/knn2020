@@ -62,7 +62,7 @@ class App extends React.Component {
   csvToArray(strData, strDelimiter) {
     // Check to see if the delimiter is defined. If not,
     // then default to comma.
-    strDelimiter = strDelimiter || ";";
+    strDelimiter = strDelimiter || ",";
     // Create a regular expression to parse the CSV values.
     var objPattern = new RegExp(
       // Delimiters.
