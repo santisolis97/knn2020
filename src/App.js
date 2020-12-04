@@ -326,6 +326,7 @@ class App extends React.Component {
       data: data,
     };
     // Realizamos la llamada, con ayuda de la libreria Axios
+    var self = this;
     axios(config)
       .then((response) => {
         this.setState({ loading: false });
@@ -389,6 +390,8 @@ class App extends React.Component {
         this.setState({ sets: sets });
       })
       .catch(function (error) {
+        alert("Error en la carga de datos. Consulte ayuda");
+        self.setState({ loading: false });
         console.log(error);
       });
   }
@@ -408,8 +411,13 @@ class App extends React.Component {
               <div className="row">
                 <div className="col">
                   <div className="form-group">
-                    <p>Inserte dataset:</p>
-                    <input id="fileinput" name="csv" type="file"></input>
+                    <p>Inserte dataset(Formato CSV):</p>
+                    <input
+                      id="fileinput"
+                      name="csv"
+                      type="file"
+                      accept=".csv"
+                    ></input>
                     <br />
                     <br />
                     <br />
@@ -622,8 +630,8 @@ class App extends React.Component {
                   <div className="card-body">
                     {this.state.usedColors.length > 0 && (
                       <div className="tabla">
-                        <div class="alert alert-dark" role="alert">
-                          <i class="fas fa-info-circle"></i> Los cuadrados
+                        <div className="alert alert-dark" role="alert">
+                          <i className="fas fa-info-circle"></i> Los cuadrados
                           representan los puntos del dataset de training y los
                           circulos a los puntos del dataset de testing
                         </div>
