@@ -432,7 +432,7 @@ class App extends React.Component {
                     ></input>
                   </div>
                   <div className="form-group">
-                    <p>Inserte delimitador</p>
+                    <p>Inserte delimitador de campos</p>
                     <input
                       className="container"
                       type="text"
