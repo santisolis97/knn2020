@@ -149,7 +149,7 @@ input, textarea{
       cursor: default;
     }
     i{
-      margin-left: 130px;
+      /* margin-left: 130px; */
     }
 
     .ayuda{
@@ -164,3 +164,11 @@ input, textarea{
       color: rgba(255, 255, 255, 0.699);
       text-decoration: none !important;
     }
+#fileinput{
+  /* border: 1px solid white; */
+  padding: 0;
+  background-color: white;
+  color: #282c34;
+  border-radius: 100px;
+  
+}

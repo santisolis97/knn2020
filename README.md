@@ -10,7 +10,7 @@ La aplicación se encuentra desplegada en: https://knn2020-frontend.herokuapp.co
 En caso de que quieras usar la aplicación, el formato dataset debe estar en formato CSV con el siguiente formato, sin importar el nombre de los atributos(puede ser cualquiera)\
 ![Alt text](formatoCSV.png?raw=true "formato")
 ```bash
-IMPORTANTE! El delimitador de campos debe ser ";" (punto y coma)
+IMPORTANTE! El delimitador de campos debe ser especificado en el formulario, de lo contrario, por defecto será: ","
 ```
 
 

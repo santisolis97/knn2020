@@ -62,6 +62,7 @@ class App extends React.Component {
   csvToArray(strData, strDelimiter) {
     // Check to see if the delimiter is defined. If not,
     // then default to comma.
+    console.log(strDelimiter);
     strDelimiter = strDelimiter || ";";
     // Create a regular expression to parse the CSV values.
     var objPattern = new RegExp(
@@ -116,8 +117,8 @@ class App extends React.Component {
     return arrData;
   }
   //Aqui convertimos el Array armado anteriormente, finalmente en un JSON.
-  csv2Json(csv) {
-    var array = this.csvToArray(csv);
+  csv2Json(csv, strDelimiter) {
+    var array = this.csvToArray(csv, strDelimiter);
     var objArray = [];
     for (var i = 1; i < array.length; i++) {
       objArray[i - 1] = {};
@@ -284,116 +285,126 @@ class App extends React.Component {
 
   // Con handleSubmit manejamos la parte de cuando el boton se presiona y hay q calcular.
   handleSubmit(event) {
-    this.setState({ newK: "" });
-    event.preventDefault();
-    this.setState({ loading: true });
-    var sets = [];
-    //Aca preparamos los valores del formulario para poder hacer la llamada a la API.
     const dataxios = new FormData(event.target);
-    var kValue = dataxios.get("kValue");
-    this.setState({ kValue });
-    var xDivision = dataxios.get("xDivision");
-    var yDivision = dataxios.get("yDivision");
+
     var trainingSize = dataxios.get("trainingSize");
-    var firstRow = this.state.contents.split("\n")[0];
-    var firstAtt = firstRow.split(";")[0];
-    var secAtt = firstRow.split(";")[1];
-    var classAtt = firstRow.split(";")[2];
-    this.setState({ firstAtt });
-    this.setState({ secAtt });
-    var csv = this.state.contents;
-    csv = csv.replace(firstAtt, "x");
-    csv = csv.replace(secAtt, "y");
-    csv = csv.replace(classAtt, "clase");
-    csv = this.csv2Json(csv);
-    console.log(csv);
-    var json = JSON.parse(csv);
-    var data = JSON.stringify(json);
-    console.log(data);
-    this.setState({ data });
-    // Una vez preparados los valores de los parametros, lo que hacemos con este if es preguntar si el dataset con el que se esta
-    // realizando esta corrida es igual al dataset de la corrida anterior, para asi no volver a calcular el random para definir
-    // el conjunto training y el conjunto de test.
+    var delimiter = dataxios.get("delimiter");
+    if (delimiter === "," || delimiter === ";") {
+      if (trainingSize >= 2 && trainingSize <= 99) {
+        this.setState({ newK: "" });
+        event.preventDefault();
+        this.setState({ loading: true });
+        var sets = [];
+        //Aca preparamos los valores del formulario para poder hacer la llamada a la API.
+        var kValue = dataxios.get("kValue");
+        this.setState({ kValue });
+        var xDivision = dataxios.get("xDivision");
+        var yDivision = dataxios.get("yDivision");
+        var firstRow = this.state.contents.split("\n")[0];
+        var firstAtt = firstRow.split(delimiter)[0];
+        var secAtt = firstRow.split(delimiter)[1];
+        var classAtt = firstRow.split(delimiter)[2];
+        this.setState({ firstAtt });
+        this.setState({ secAtt });
+        var csv = this.state.contents;
+        csv = csv.replace(firstAtt, "x");
+        csv = csv.replace(secAtt, "y");
+        csv = csv.replace(classAtt, "clase");
+        csv = this.csv2Json(csv, delimiter);
+        console.log(csv);
+        var json = JSON.parse(csv);
+        var data = JSON.stringify(json);
+        console.log(data);
+        this.setState({ data });
+        // Una vez preparados los valores de los parametros, lo que hacemos con este if es preguntar si el dataset con el que se esta
+        // realizando esta corrida es igual al dataset de la corrida anterior, para asi no volver a calcular el random para definir
+        // el conjunto training y el conjunto de test.
 
-    // Preparamos la config para la llamada
+        // Preparamos la config para la llamada
 
-    var config = {
-      method: "post",
-      url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}&trainingSize=${trainingSize}`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: data,
-    };
-    // Realizamos la llamada, con ayuda de la libreria Axios
-    var self = this;
-    axios(config)
-      .then((response) => {
-        this.setState({ loading: false });
-        // Guardamos los elementos que nos devuelve la llamada (la grilla. los elementos de test calculados, y la coherencia de cada K)
-        var gridElements = response.data.gridElements;
-        let testElements = response.data.testElements;
-        var trainingElements = response.data.trainingElements;
-        var testEl = testElements;
-        this.setState({ testEl });
-        var kFactors = response.data.kfactor;
+        var config = {
+          method: "post",
+          url: `https://knn2020-backend.herokuapp.com/api/ia-knn/v1/knn/calculate-grid?kValue=${kValue}&xDivision=${xDivision}&yDivision=${yDivision}&trainingSize=${trainingSize}`,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: data,
+        };
+        // Realizamos la llamada, con ayuda de la libreria Axios
+        var self = this;
+        axios(config)
+          .then((response) => {
+            this.setState({ loading: false });
+            // Guardamos los elementos que nos devuelve la llamada (la grilla. los elementos de test calculados, y la coherencia de cada K)
+            var gridElements = response.data.gridElements;
+            let testElements = response.data.testElements;
+            var trainingElements = response.data.trainingElements;
+            var testEl = testElements;
+            this.setState({ testEl });
+            var kFactors = response.data.kfactor;
 
-        this.setState({ kFactors });
+            this.setState({ kFactors });
 
-        // Procedemos a hallar la mayor coherencia
-        var maxAccu = Math.max.apply(Math, this.state.kFactors);
-        this.setState({ maxAccu });
-        // Aqui creamos un array "Maxs" donde almacenamos para que valores de K se obtiene el maximo de coherencia.
-        var Maxs = [];
-        for (var h = 0; h < this.state.kFactors.length; h++) {
-          if (this.state.kFactors[h] === this.state.maxAccu) {
-            Maxs.push(h + 1);
-          }
-        }
-        this.setState({ Maxs });
-        // Cortamos el array de las coherencias de los K a 10 para poder mostrarlos en una tabla
-        kFactors = kFactors.slice(0, 10);
-        this.setState({ kFactors });
+            // Procedemos a hallar la mayor coherencia
+            var maxAccu = Math.max.apply(Math, this.state.kFactors);
+            this.setState({ maxAccu });
+            // Aqui creamos un array "Maxs" donde almacenamos para que valores de K se obtiene el maximo de coherencia.
+            var Maxs = [];
+            for (var h = 0; h < this.state.kFactors.length; h++) {
+              if (this.state.kFactors[h] === this.state.maxAccu) {
+                Maxs.push(h + 1);
+              }
+            }
+            this.setState({ Maxs });
+            // Cortamos el array de las coherencias de los K a 10 para poder mostrarlos en una tabla
+            kFactors = kFactors.slice(0, 10);
+            this.setState({ kFactors });
 
-        // Aca ya pasamos a preparar los datos para el formato que deben tener para que parsee la libreria que grafica.
-        var clases1 = [];
-        for (var i = 0; i < testElements.length; i++) {
-          if (!clases1.includes(testElements[i].clase)) {
-            clases1.push(testElements[i].clase);
-          }
-        }
+            // Aca ya pasamos a preparar los datos para el formato que deben tener para que parsee la libreria que grafica.
+            var clases1 = [];
+            for (var i = 0; i < testElements.length; i++) {
+              if (!clases1.includes(testElements[i].clase)) {
+                clases1.push(testElements[i].clase);
+              }
+            }
 
-        var clases2 = [];
-        for (i = 0; i < gridElements.length; i++) {
-          if (!clases2.includes(gridElements[i].clase)) {
-            clases2.push(gridElements[i].clase);
-          }
-        }
-        var clases = this.getClases(clases1, clases2);
-        this.setState({ clases });
-        trainingElements = this.addStyle(trainingElements, clases);
-        gridElements = this.addColor(gridElements, clases);
-        testElements = this.addColor(testElements, clases);
-        var usedColors = this.getUsedColors(this.state.clases);
-        sets.push({ gridElements, trainingElements, testElements, kValue });
-        this.setState(
-          { gridElements, trainingElements, testElements },
-          function () {
-            this.handleNewK(this.state);
-          }.bind(this)
-        );
-        this.setState({ usedColors });
-        document
-          .getElementById("wrapper")
-          .scrollIntoView({ behavior: "smooth", block: "start" });
+            var clases2 = [];
+            for (i = 0; i < gridElements.length; i++) {
+              if (!clases2.includes(gridElements[i].clase)) {
+                clases2.push(gridElements[i].clase);
+              }
+            }
+            var clases = this.getClases(clases1, clases2);
+            this.setState({ clases });
+            trainingElements = this.addStyle(trainingElements, clases);
+            gridElements = this.addColor(gridElements, clases);
+            testElements = this.addColor(testElements, clases);
+            var usedColors = this.getUsedColors(this.state.clases);
+            sets.push({ gridElements, trainingElements, testElements, kValue });
+            this.setState(
+              { gridElements, trainingElements, testElements },
+              function () {
+                this.handleNewK(this.state);
+              }.bind(this)
+            );
+            this.setState({ usedColors });
+            document
+              .getElementById("wrapper")
+              .scrollIntoView({ behavior: "smooth", block: "start" });
 
-        this.setState({ sets: sets });
-      })
-      .catch(function (error) {
-        alert("Error en la carga de datos. Consulte ayuda");
-        self.setState({ loading: false });
-        console.log(error);
-      });
+            this.setState({ sets: sets });
+          })
+          .catch(function (error) {
+            alert("Error en la carga de datos. Consulte ayuda");
+            self.setState({ loading: false });
+            console.log(error);
+          });
+      } else {
+        alert("El porcentaje no esta dentro del rango solicitado");
+      }
+    } else {
+      alert("Por favor ingrese , ó ;");
+    }
   }
 
   render() {
@@ -413,25 +424,33 @@ class App extends React.Component {
                   <div className="form-group">
                     <p>Inserte dataset(Formato CSV):</p>
                     <input
+                      className="container-fluid"
                       id="fileinput"
                       name="csv"
                       type="file"
                       accept=".csv"
                     ></input>
-                    <br />
-                    <br />
-                    <br />
-
-                    <i className="far fa-question-circle d-flex justify-content-start">
-                      <a
-                        className="anchor"
-                        href="https://github.com/santisolis97/knn2020/blob/master/README.md"
-                        target="_blank"
-                      >
-                        <p className="ayuda"> Ayuda</p>
-                      </a>
-                    </i>
                   </div>
+                  <div className="form-group">
+                    <p>Inserte delimitador</p>
+                    <input
+                      className="container"
+                      type="text"
+                      name="delimiter"
+                      placeholder="Por ejemplo: , o ;"
+                    ></input>
+                  </div>
+                  <br />
+
+                  <i className="far fa-question-circle d-flex justify-content-start">
+                    <a
+                      className="anchor"
+                      href="https://github.com/santisolis97/knn2020/blob/master/README.md"
+                      target="_blank"
+                    >
+                      <p className="ayuda"> Ayuda</p>
+                    </a>
+                  </i>
                 </div>
                 <div className="col">
                   <div className="form-group">
