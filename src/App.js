@@ -412,11 +412,11 @@ class App extends React.Component {
 
     return (
       <div className="App">
+        <div className="IA">
+          Inteligencia Artificial - UTN FRRe 2020 - Grupo 8
+        </div>
         <header>Knn-Algorithm</header>
         <div className="App-body container-fluid">
-          <div className="IA">
-            Inteligencia Artificial - UTN FRRe 2020 - Grupo 8
-          </div>
           <div className="landing">
             <form className="container-fluid" onSubmit={this.handleSubmit}>
               <div className="row">
